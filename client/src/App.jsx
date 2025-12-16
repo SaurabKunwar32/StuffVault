@@ -8,7 +8,7 @@ import Settings from "./Component/Settings.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainView />
+    element: <Login />
   },
   {
     path: "/register",
