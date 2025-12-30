@@ -112,32 +112,41 @@ export default function Settings() {
             return
         };
 
+        if (updatedName.length < 3) {
+            setNotificationPopup({
+                message: "Name at least 3 letters!",
+                type: "error",
+            });
+            return
+        };
         try {
             setNotificationPopup({ message: "", type: "" });
 
-            // ✅ Call your Axios API helper
+            //  Call your Axios API helper
             const data = await updateUser(updatedName);
 
-            // ✅ Update local state
+            //  Update local state
             setUserData((prev) => ({
                 ...prev,
                 name: data.name || updatedName,
             }));
 
             setIsEditing(false);
+            // console.log(data);
             setNotificationPopup({
                 message: data.message || "Name updated successfully!",
                 type: "success",
             });
         } catch (err) {
-            // console.error("Error updating name:", err);
+            // console.error("Error updating name:", err.response.data);
             const message = parseApiError(
                 err,
                 "Failed to update name. Please try again."
             );
-
+            setIsEditing(false);
+            // console.log(err.response.data);
             setNotificationPopup({
-                message,
+                message: err.response.data || message,
                 type: "error",
             });
         }
@@ -188,7 +197,7 @@ export default function Settings() {
         try {
             setNotificationPopup({ message: "", type: "" });
 
-            // ✅ Use Axios helper
+            //  Use Axios helper
             const data = await changeUserPassword(currentPassword, newPassword);
 
             setNotificationPopup({
@@ -209,8 +218,13 @@ export default function Settings() {
             );
 
             setNotificationPopup({
-                message,
+                message: err.response.data || message,
                 type: "error"
+            });
+            setChangePassData({
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: "",
             });
         }
     }

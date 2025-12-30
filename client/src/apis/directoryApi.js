@@ -9,7 +9,12 @@ export const createDirectory = async (dirId = "", newDirname) => {
     const { data } = await axiosWithCreds.post(
         `/directory/${dirId}`,
         {},
-        { headers: { dirname: newDirname } }
+        {
+            headers: {
+                dirname: newDirname,
+                "X-CSRF-Check": "saurabdada",
+            }
+        }
     );
     return data;
 };

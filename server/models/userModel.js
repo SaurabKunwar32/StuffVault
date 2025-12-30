@@ -6,7 +6,7 @@ const userSchema = new Schema(
     name: {
       type: String,
       required: true,
-      minLength: [3, "Name must be a string with at least 3 characters"],
+      minLength: [2, "Name must be a string with at least 2 characters"],
     },
     email: {
       type: String,

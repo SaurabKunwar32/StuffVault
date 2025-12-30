@@ -5,6 +5,8 @@ import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
 import { renameFileSchema } from "../validators/authSchema.js";
 import z from "zod";
+import { sanitizeObject } from "../utils/sanitize.js";
+import { rootPath } from "../app.js";
 
 
 export const getFiles = async (req, res) => {
@@ -21,7 +23,8 @@ export const getFiles = async (req, res) => {
         return res.status(404).json({ message: "File Not found !!" })
     }
 
-    const filePath = `${process.cwd()}/storage/${id}${fileData.extension}`
+
+    const filePath = `${rootPath}/storage/${id}${fileData.extension}`
 
     if (req.query.action === "download") {
         // res.set("Content-Disposition", `attachment; filename=${fileData.name}`);
@@ -64,7 +67,9 @@ export const uploadFile = async (req, res, next) => {
         const fullFileName = `${fileId}${extension}`;
         // console.log(fullFileName);
 
-        const writeStream = createWriteStream(`./storage/${fullFileName}`);
+        // console.log(import.meta.dirname);
+        // console.log(process.cwd());
+        const writeStream = createWriteStream(`${rootPath}/storage/${fullFileName}`);
         req.pipe(writeStream);
 
         req.on("end", async () => {
@@ -83,7 +88,10 @@ export const uploadFile = async (req, res, next) => {
 }
 
 export const renameFile = async (req, res, next) => {
-    const { success, error, data } = renameFileSchema.safeParse(req.body)
+
+    const sanitizedData = sanitizeObject(req.body)
+
+    const { success, error, data } = renameFileSchema.safeParse(sanitizedData)
 
     if (!success) {
         return res.status(400).json({ errors: z.flattenError(error).fieldErrors.newFilename });
@@ -117,7 +125,7 @@ export const deleteFile = async (req, res, next) => {
     }
 
     try {
-        const fullfilename = `./storage/${id}${file.extension}`
+        const fullfilename = `${rootPath}/storage/${id}${file.extension}`
         await rm(fullfilename, { recursive: true });
 
         // await File.deleteOne({ _id: file._id })

@@ -10,7 +10,7 @@ import {
   Zap,
   ArrowLeft,
 } from "lucide-react";
-import ConfirmActionModal from "./ConfirmActionModal";
+import ConfirmActionModal from "../Models/ConfirmActionModal.jsx";
 import {
   fetchAllUsers,
   fetchUser,
@@ -40,7 +40,25 @@ export default function UsersPage() {
     user: null,
   });
 
+  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [rateLimitMessage, setRateLimitMessage] = useState("");
+
+
   // console.log(confirmModal.isOpen, confirmModal.type, confirmModal.user);
+
+
+  const handleRateLimit = (error) => {
+    if (error.status === 429) {
+      setIsRateLimited(true);
+      setRateLimitMessage(
+        error.response?.data?.message ||
+        "Too many requests. Please try again later."
+      );
+      return true;
+    }
+    return false;
+  };
+
 
   async function refreshUsers() {
     try {
@@ -53,7 +71,12 @@ export default function UsersPage() {
       setUserEmail(currentUser.email);
       setUserRole(currentUser.role);
     } catch (error) {
-      console.error("Error refreshing users:", error);
+      // console.log(object);
+      if (handleRateLimit(error)) return;
+      if (error.status === 401) {
+        navigate("/login");
+      }
+      // console.error("Error refreshing users:", error);
     }
   }
 
@@ -100,7 +123,7 @@ export default function UsersPage() {
         message: `${user.name} logged out successfully!`,
         type: "logout",
       });
-      console.log(data);
+      // console.log(data);
 
       refreshUsers()
     } catch (error) {
@@ -230,7 +253,25 @@ export default function UsersPage() {
   };
 
 
+  if (isRateLimited) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-center px-4">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">
+          Slow down ⏳
+        </h1>
+        <p className="text-gray-600 max-w-md">
+          {rateLimitMessage}
+        </p>
+
+        <p className="text-sm text-gray-400 mt-6">
+          This page will be available again shortly.
+        </p>
+      </div>
+    );
+  }
+
   return (
+
     <div className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200">
       {/* Top Bar */}
       <header className="w-full bg-white shadow-sm py-4 px-6 flex justify-between items-center">

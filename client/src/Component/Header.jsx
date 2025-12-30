@@ -25,7 +25,7 @@ export default function Header({
   disabled = false,
 }) {
 
-  const BASE_URL = "http://localhost:3000";
+  // const BASE_URL = "http://localhost:3000";
 
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
@@ -65,6 +65,7 @@ export default function Header({
           setUserPicture("");
           window.location.href = "http://localhost:5173/login";
         } else {
+          
           console.error("Error fetching user info:", error);
         }
       }

@@ -1,46 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from '@react-oauth/google';
+import { Archive, Github } from "lucide-react";
 import { loginWithGoogle } from "../apis/loginWithGoogle.js";
-import { Github } from "lucide-react";
 import { loginWithGithub } from "../apis/loginWithGithub.js";
-import { registerUser } from "../apis/userApi.js";
-import { sendOtp, verifyOtp } from '../apis/authApi.js'
+import { sendOtp } from '../apis/authApi.js'
 
 
 export default function Register() {
 
     const [formData, setFormData] = useState({
         name: "saurab ",
-        email: "keme8832@gmail.com",
+        email: "keme88@gmail.com",
         password: "abcd",
     });
+
 
     // serverError will hold the error message from the server
     const [serverError, setServerError] = useState("");
     const [isSuccess, setIsSuccess] = useState(false);
 
-    // OTP state
-    const [otp, setOtp] = useState("");
-    const [otpSent, setOtpSent] = useState(false);
-    const [otpVerified, setOtpVerified] = useState(false);
-    const [otpError, setOtpError] = useState("");
-    const [isSending, setIsSending] = useState(false);
-    const [isVerifying, setIsVerifying] = useState(false);
-    const [countdown, setCountdown] = useState(0);
 
     const navigate = useNavigate();
 
-    // Handle the input changes
     const handleChange = (e) => {
         // console.log({ [e.target.name]: e.target.value });
         const { name, value } = e.target;
-        console.log({ name, value });
-
-        // Clear the server error as soon as the user starts typing in Email
-        if (name === "email" && serverError) {
-            setServerError("");
-        }
+        // console.log({ name, value });
 
         setFormData((prevData) => ({
             ...prevData,
@@ -48,84 +34,69 @@ export default function Register() {
         }));
     };
 
-    // Countdown timer for resend
-    useEffect(() => {
-        if (countdown <= 0) return;
-        const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-        return () => clearTimeout(timer);
-    }, [countdown]);
-
-
-    const handleSendOtp = async () => {
+    const handleSendOtp = async (e) => {
+        e.preventDefault();
         const { email } = formData;
         if (!email) {
-            setOtpError("Please enter your email first.");
+            setServerError("Please enter your email first.");
             return;
         }
 
         try {
-            setIsSending(true);
+            setIsSuccess(true);
             const data = await sendOtp(email);
-
-            // Assuming a successful response means OTP sent
-            setOtpSent(true);
-            setCountdown(60); // allow resend after 60s
-            setOtpError("");
+            // console.log("OTP send:", data);
+            navigate("/verify", { state: { email, formData } });
         } catch (err) {
             console.error("Send OTP error:", err);
-            setOtpError(err.response?.data?.error || "Something went wrong sending OTP.");
-        } finally {
-            setIsSending(false);
+            setServerError(err.response?.data?.error || "Something went wrong sending OTP.");
+        }
+        finally {
+            setIsSuccess(false);
         }
     };
 
-
-
-    const handleVerifyOtp = async () => {
-        const { email } = formData;
-        if (!otp) {
-            setOtpError("Please enter OTP.");
-            return;
-        }
-
-        try {
-            setIsVerifying(true);
-            const data = await verifyOtp(email, otp);
-
-            // Assuming a successful response means OTP verified
-            setOtpVerified(true);
-            setOtpError("");
-        } catch (err) {
-            console.error("Verify OTP error:", err);
-            setOtpError(err.response?.data?.error || "Invalid or expired OTP.");
-        } finally {
-            setIsVerifying(false);
-        }
-    };
-
-    // Handler for form submission
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setIsSuccess(false);
-        if (!otpVerified) return setOtpError("Please verify your email with OTP.");
-        try {
-            await registerUser({ ...formData, otp })
-            setIsSuccess(true);
-            setTimeout(() => navigate("/"), 2000);;
-        } catch (error) {
-            console.error("Error:", error);
-            setServerError(error.response?.data?.error || "Something went wrong. Please try again.");
-
-        }
-    };
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-12">
+
             <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-2xl transition-all duration-300">
-                <h2 className="text-4xl font-extrabold mb-8 text-center text-gray-800">
-                    Create an Account
-                </h2>
-                <form className="space-y-6" onSubmit={handleSubmit}>
+                <div className="mb-8 flex flex-col items-center">
+
+                    {/* Brand */}
+                    <div className="flex items-center gap-3">
+                        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 text-white shadow-lg">
+                            <Archive className="h-5 w-5" />
+                        </div>
+
+                        <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
+                            Stuff<span className="text-gray-500">Vault</span>
+                        </h2>
+                    </div>
+
+                    {/* Subtitle */}
+                    <p className="mt-2 text-l text-gray-500 text-center">
+                        Create an Account
+
+                    </p>
+
+                </div>
+
+                <div className="flex justify-center items-center mb-6">
+                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">1</div>
+                    <div className="w-16 h-1 bg-gray-200 mx-2 rounded"></div>
+                    <div className="w-8 h-8 border border-gray-400 rounded-full flex items-center justify-center text-black font-semibold">
+                        2
+                    </div>
+                </div>
+
+                {serverError && (
+                    <span className="text-sm text-red-600 mt-1">{serverError}</span>
+                )}
+
+                <form className="space-y-6"
+                    onSubmit={handleSendOtp}
+                >
                     {/* Name */}
                     <div>
                         <label
@@ -147,9 +118,8 @@ export default function Register() {
                     </div>
 
 
-                    {/* Email Input + Send OTP */}
+                    {/* Email  */}
                     <div className="mb-4">
-
                         <label
                             htmlFor="email"
                             className="block text-sm font-medium text-gray-700 mb-1"
@@ -168,78 +138,12 @@ export default function Register() {
                                 id="email"
                                 name="email"
                                 placeholder="you@example.com"
-                                required
+                            // required
                             />
 
-                            <button
-                                type="button"
-                                onClick={handleSendOtp}
-                                disabled={isSending || countdown > 0}
-                                className={`absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 text-sm rounded-lg text-white transition
-      ${isSending || countdown > 0
-                                        ? "bg-gray-400 cursor-not-allowed"
-                                        : "bg-blue-600 hover:bg-blue-700"
-                                    }`}
-                            >
-                                {isSending
-                                    ? "Sending..."
-                                    : countdown > 0
-                                        ? `${countdown}s`
-                                        : "Send OTP"}
-                            </button>
+
                         </div>
-                        {serverError && (
-                            <span className="text-sm text-red-600 mt-1">{serverError}</span>
-                        )}
                     </div>
-
-                    {/* OTP Input + Verify */}
-                    {otpSent && (
-                        <div className="mb-4">
-                            <label
-                                htmlFor="otp"
-                                className="block text-sm font-medium text-gray-700 mb-1"
-                            >
-                                Enter OTP
-                            </label>
-                            <div className="relative w-full">
-                                <input
-                                    type="text"
-                                    id="otp"
-                                    name="otp"
-                                    value={otp}
-                                    onChange={(e) => setOtp(e.target.value)}
-                                    placeholder="4-digit OTP"
-                                    maxLength={4}
-                                    required
-                                    className="w-full pr-28 px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={handleVerifyOtp}
-                                    disabled={isVerifying || otpVerified}
-                                    className={`absolute right-1 top-1/2 -translate-y-1/2 px-3 py-1 rounded-lg text-white text-sm transition
-          ${otpVerified
-                                            ? "bg-green-600"
-                                            : isVerifying
-                                                ? "bg-gray-400 cursor-not-allowed"
-                                                : "bg-blue-600 hover:bg-blue-700"
-                                        }`}
-                                >
-                                    {isVerifying
-                                        ? "..."
-                                        : otpVerified
-                                            ? "✓"
-                                            : "Verify"}
-                                </button>
-                            </div>
-                            {/* Error messages */}
-                            {otpError && (
-                                <span className="text-sm text-red-600 mt-1">{otpError}</span>
-                            )}
-                        </div>
-                    )}
-
 
                     {/* Password */}
                     <div>
@@ -264,16 +168,13 @@ export default function Register() {
                     {/* Submit */}
                     <button
                         type="submit"
-                        disabled={!otpVerified || isSuccess}
                         className={`w-full text-white py-2 rounded-xl font-semibold shadow-md transition-colors duration-300 ease-in-out
-    ${isSuccess
+                                ${isSuccess
                                 ? "bg-green-600 hover:bg-green-700"
-                                : !otpVerified
-                                    ? "bg-gray-400 cursor-not-allowed"
-                                    : "bg-blue-600 hover:bg-blue-700"
+                                : "bg-blue-600 hover:bg-blue-700"
                             }`}
                     >
-                        {isSuccess ? "Registration Successful" : "Register"}
+                        {isSuccess ? "Sending OTP..." : "Send OTP"}
                     </button>
 
                 </form>
@@ -304,7 +205,7 @@ export default function Register() {
                                 console.error(data.error);
                                 return;
                             }
-                            navigate("/"); // ✅ Works only if inside component
+                            navigate("/"); //  Works only if inside component
                         }}
                         onError={() => {
                             console.log("Login Failed");

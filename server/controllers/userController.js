@@ -9,10 +9,13 @@ import fs from "fs";
 import redisClient from '../config/redis.js'
 import { changePasswordSchema, changeUserRoleSchema, loginSchema, registerSchema, setPasswordSchema, updateNameSchema } from "../validators/authSchema.js";
 import z from "zod";
+import { sanitizeObject } from "../utils/sanitize.js";
 
 export const register = async (req, res, next) => {
 
-  const { success, data, error } = registerSchema.safeParse(req.body)
+  const sanitizedData = sanitizeObject(req.body)
+
+  const { success, data, error } = registerSchema.safeParse(sanitizedData)
 
   if (!success) {
     // console.log(z.flattenError(error).fieldErrors);
@@ -22,6 +25,16 @@ export const register = async (req, res, next) => {
   }
 
   const { name, password, email, otp } = data;
+  // console.log(data);
+
+  const checkUserEmail = await User.findOne({ email });
+
+  if (checkUserEmail) {
+    return res.status(409).json({
+      error: "User already exists with this email"
+    });
+  }
+
 
   const otpRecord = await OTP.findOne({ email, otp });
 
@@ -30,6 +43,7 @@ export const register = async (req, res, next) => {
   }
 
   await otpRecord.deleteOne();
+
 
   const session = await mongoose.startSession();
 
@@ -61,7 +75,7 @@ export const register = async (req, res, next) => {
     );
 
     await session.commitTransaction();
-    return res.status(201).json({ message: "User Registered !!" });
+    return res.status(201).json({ message: "User Registered successfully !!" });
   } catch (err) {
     await session.abortTransaction();
 
@@ -84,7 +98,10 @@ export const register = async (req, res, next) => {
 };
 
 export const login = async (req, res, next) => {
-  const { success, data, error } = loginSchema.safeParse(req.body)
+
+  const sanitizedData = sanitizeObject(req.body)
+
+  const { success, data, error } = loginSchema.safeParse(sanitizedData)
 
   if (!success) {
     return res
@@ -135,6 +152,7 @@ export const login = async (req, res, next) => {
   res.cookie("sid", sessionId, {
     httpOnly: true,
     signed: true,
+    sameSite: "lax",
     maxAge: 60 * 1000 * 60 * 24 * 7,
   });
   res.json({ message: "User loggin In !!" });
@@ -433,7 +451,7 @@ export const updateName = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: "Internal server error || name must be greater than 3" });
+    return res.status(500).json({ message: "Error while changing name !!" });
   }
 };
 
@@ -482,7 +500,7 @@ export const setPassword = async (req, res) => {
   }
 
   try {
-    const userId = req.user._id; 
+    const userId = req.user._id;
     const { newPassword } = data;
 
 

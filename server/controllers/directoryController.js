@@ -1,9 +1,11 @@
 import { rm } from "fs/promises";
 import Directory from "../models/directoryModel.js";
 import File from "../models/fileModel.js";
-import { renameDirectorySchema } from "../validators/authSchema.js";
+import { createDirectorySchema, renameDirectorySchema } from "../validators/authSchema.js";
 import z from "zod";
-import { da } from "zod/locales";
+import { sanitizeInput } from "../utils/sanitize.js";
+
+// const clean = purify.sanitize('<b>hello there</b>');
 
 export const getDirectory = async (req, res, next) => {
     // console.log(req.user);
@@ -19,7 +21,7 @@ export const getDirectory = async (req, res, next) => {
     const _id = req.params.id || user.rootdirId.toString();
 
     try {
-        const directorydata = await Directory.findOne({ _id }).lean();
+        const directorydata = await Directory.findOne({ _id, userId: req.user._id }).lean();
 
         if (!directorydata) {
             return res
@@ -44,8 +46,23 @@ export const getDirectory = async (req, res, next) => {
 export const createDirectory = async (req, res, next) => {
     const user = req.user;
 
-    const parentDirId = req.params.parentDirId || user.rootdirId.toString();
-    const dirname = req.headers.dirname || "New Folder";
+    if (!req.headers['x-csrf-check']) {
+        return res.status(404).json({error:"Some headers are missing !!"})
+    }
+
+    const { success, data, error } = createDirectorySchema.safeParse({
+        params: req.params,
+        headers: req.headers,
+    })
+
+    if (!success) {
+        return res.status(400).json({ errors: z.flattenError(error).fieldErrors });
+    }
+
+    const { params, headers } = data;
+
+    const parentDirId = params.parentDirId || user.rootdirId.toString();
+    const dirname = sanitizeInput(headers.dirname) || "New Folder";
 
     try {
         const parentDir = await Directory.findOne({ _id: parentDirId }).lean();
@@ -77,10 +94,6 @@ export const renameDirectory = async (req, res, next) => {
     const user = req.user;
     const { success, data, error } = renameDirectorySchema.safeParse(req.body)
 
-    // console.log(data);
-    // return
-    // console.log(z.flattenError(error).fieldErrors);
-
 
     if (!success) {
         return res.status(400).json({ errors: z.flattenError(error).fieldErrors });
@@ -89,10 +102,11 @@ export const renameDirectory = async (req, res, next) => {
     const { id } = req.params;
     const { newDirName } = data;
 
+
     try {
         const dirData = await Directory.findOneAndUpdate(
             { _id: id, userId: user._id },
-            { name: newDirName }
+            { name: sanitizeInput(newDirName) }
         );
         // console.log(dirData);
         res.status(200).json({ message: "Directory renamed!! " });

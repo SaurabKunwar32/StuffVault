@@ -1,4 +1,13 @@
+import mongoose from "mongoose";
 import * as z from "zod";
+
+
+// reusable custom validator
+const objectId = z.string().refine(
+    (val) => mongoose.Types.ObjectId.isValid(val),
+    { message: "Invalid directory ID" }
+);
+
 
 export const loginSchema = z.object({
     email: z.email("Please enter a valid email !!"),
@@ -37,12 +46,11 @@ export const sendOtpSchema = z.object({
         .regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Please enter a valid email address"),
 });
 
-
 export const renameDirectorySchema = z.object({
     newDirName: z
         .string("Directory name is required")
         .min(1, "Directory name cannot be empty")
-        .max(100, "Directory name is too long")
+        .max(1000, "Directory name is too long")
         .regex(
             /^[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$/,
             "Directory name can contain single spaces between words only (no leading, trailing, or multiple spaces)"
@@ -97,9 +105,23 @@ export const changePasswordSchema = z.object({
 });
 
 export const setPasswordSchema = z.object({
-  newPassword: z
-    .string({ required_error: "New password is required" })
-    .min(4, "Password must be at least 4 characters long")
-    .refine((val) => val.trim().length > 0, "Password cannot be only spaces")
-    .refine((val) => !/^\s|\s$/.test(val), "Password cannot start or end with a space")
+    newPassword: z
+        .string({ required_error: "New password is required" })
+        .min(4, "Password must be at least 4 characters long")
+        .refine((val) => val.trim().length > 0, "Password cannot be only spaces")
+        .refine((val) => !/^\s|\s$/.test(val), "Password cannot start or end with a space")
+});
+
+export const createDirectorySchema = z.object({
+    params: z.object({
+        parentDirId: objectId.optional(),
+    }),
+    headers: z.object({
+        dirname: z
+            .string()
+            .trim()
+            .min(0, "Directory name cannot be empty")
+            .max(200, "Directory name too long")
+            .optional(),
+    }),
 });

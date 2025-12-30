@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import Header from './Header.jsx'
 import { useNavigate, useParams } from 'react-router-dom';
-import DirectoryModel from './DirectoryModel.jsx';
+import DirectoryModel from '../Models/DirectoryModel.jsx';
 import DirectoryList from './DirectoryList.jsx';
-import RenameModal from './RenameModal.jsx';
+import RenameModal from '../Models/RenameModal.jsx';
 import DetailsPopup from './DetailsPopup.jsx'
-import DeleteModal from './DeleteModel.jsx';
+import DeleteModal from '../Models/DeleteModel.jsx';
 import { deleteFile, renameFile } from "../apis/fileApi.js";
 import { getDirectoryItems, createDirectory, deleteDirectory, renameDirectory } from "../apis/directoryApi.js";
 
@@ -61,6 +61,7 @@ export default function DirectoryView() {
     console.log(item);
     setDetailsItem(item);
   };
+
   const closeDetailsPopup = () => setDetailsItem(null);
 
 
@@ -84,7 +85,7 @@ export default function DirectoryView() {
     // Axios doesn't have "ok", it throws errors for non-2xx responses automatically.
     // But in case the backend returns a custom error in data:
     if (!response || typeof response !== "object") {
-      throw new Error("Invalid response from server");
+      throw new Error("Some Error occured !! ");
     }
 
     if (response.error) {
@@ -108,9 +109,9 @@ export default function DirectoryView() {
       setDirectoriesList([...data.directories].reverse());
       setFilesList([...data.files].reverse());
     } catch (err) {
-      // console.log(err);
+      // console.log(err.response.data);
       if (err.response?.status === 401) navigate("/login");
-      else setErrorMessage(err.response?.data?.error || err.message);
+      else setErrorMessage(err.response.data || err.response?.data?.error || err.message);
     }
   };
 
@@ -325,6 +326,9 @@ export default function DirectoryView() {
       setShowCreateDirModal(false);
       loadDirectory();
     } catch (err) {
+      setTimeout(() => {
+        setShowCreateDirModal(false);
+      }, 1000);
       setErrorMessage(err.response?.data?.error || err.message);
     }
   }
@@ -342,20 +346,17 @@ export default function DirectoryView() {
       setrenameErrorsMessage("");
     }
   }, [renameValue]);
-  
+
   // Rename file /directory
   async function handleRenameSubmit(e) {
     e.preventDefault();
     try {
       if (renameType === "file") {
-        console.log(renameValue.length);
-
-
-        if (renameValue.length < 3 || !/^[^\s].*[^\s]\.png$/i.test(renameValue)) {
+        if (renameValue.length < 3 || !/^[^\s].*[^\s]$/i.test(renameValue)) {
           setrenameErrorsMessage(
             renameValue.length < 1
               ? "Value cannot be empty !!"
-              : "Filename cannot start or end with a space, and must end with '.png' !!"
+              : "Filename cannot start or end with a space !!"
           );
           return;
         }
@@ -381,8 +382,17 @@ export default function DirectoryView() {
       setRenameId(null);
       loadDirectory();
     } catch (err) {
-      console.log(err);
-      setErrorMessage(err.response?.data?.error || err.message);
+      // console.log(err.response.data);
+      const msg =
+        err.response.data ||
+        "Rename failed";
+
+      setErrorMessage(msg);
+
+      setTimeout(() => {
+        setShowRenameModal(false);
+        setErrorMessage(msg);
+      }, 1000);
     }
   }
 
@@ -416,14 +426,51 @@ export default function DirectoryView() {
   ]
 
 
+  useEffect(() => {
+    if (!errorMessage) return;
+
+    const timer = setTimeout(() => {
+      setErrorMessage("");
+    }, 4000); // 4 seconds
+
+    return () => clearTimeout(timer);
+  }, [errorMessage]);
+
   return (
     <>
       {errorMessage &&
         errorMessage !== "Directory not found or you do not have access to it!" && (
-          <div className="mt-4 px-4 py-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm shadow-sm">
-            {errorMessage}
+          <div className="fixed top-6 right-6 z-50 animate-slide-in">
+            <div className="flex items-center gap-3 px-5 py-4 bg-red-50 border-l-4 border-red-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
+
+              {/* Error Icon */}
+              <div className="flex-shrink-0">
+                <svg
+                  className="w-6 h-6 text-red-600"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"
+                  />
+                </svg>
+              </div>
+
+              {/* Message */}
+              <div className="flex-1">
+                <p className="text-sm text-red-800 font-medium leading-snug">
+                  {errorMessage}
+                </p>
+              </div>
+            </div>
           </div>
         )}
+
+
 
 
       <Header

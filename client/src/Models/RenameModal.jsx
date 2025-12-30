@@ -10,7 +10,6 @@ function RenameModal({
 }) {
   const inputRef = useRef(null);
 
-  console.log();
   useEffect(() => {
     // Focus and select text only once on mount
     if (inputRef.current) {

@@ -39,7 +39,7 @@ export const verifyotp = async (req, res, next) => {
     if (!otpRecord) {
         return res.status(400).json({ error: "Invalid or Expired OTP !!" })
     }
-    return res.json({ message: "OTP verfied !!" })
+    return res.status(200).json({ message: "OTP verfied !!" })
 }
 
 export const loginWithGoogle = async (req, res, next) => {
@@ -88,6 +88,7 @@ export const loginWithGoogle = async (req, res, next) => {
         res.cookie("sid", sessionId, {
             httpOnly: true,
             signed: true,
+            sameSite: "lax",
             maxAge: 1000 * 60 * 60 * 24 * 7,
         });
 
@@ -138,6 +139,7 @@ export const loginWithGoogle = async (req, res, next) => {
         res.cookie("sid", sessionId, {
             httpOnly: true,
             signed: true,
+            sameSite: "lax",
             maxAge: 60 * 1000 * 60 * 24 * 7,
         });
 
@@ -256,6 +258,7 @@ export const callbackGithub = async (req, res, next) => {
             res.cookie("sid", sessionId, {
                 httpOnly: true,
                 signed: true,
+                sameSite: "lax",
                 maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
             });
 
@@ -309,6 +312,7 @@ export const callbackGithub = async (req, res, next) => {
             res.cookie("sid", sessionId, {
                 httpOnly: true,
                 signed: true,
+                sameSite: "lax",
                 maxAge: 1000 * 60 * 60 * 24 * 7,
             });
 
