@@ -41,7 +41,7 @@ export const limiter = Object.freeze({
   }),
 
   login: RateLimiter({
-    windowTimeInMs: 15 * 60 * 1000, maxLimit: 5, message: "Too many login attempts. Try again later.", keyGenerator: userOrIpKey,
+    windowTimeInMs: 15 * 60 * 1000, maxLimit: 25, message: "Too many login attempts. Try again later.", keyGenerator: userOrIpKey,
   }),
 
   loginWithGoogle: RateLimiter({
@@ -53,7 +53,7 @@ export const limiter = Object.freeze({
   }),
 
   sendOtp: RateLimiter({
-    windowTimeInMs: 10 * 60 * 1000, maxLimit: 20, message: "Too many OTP requests.", keyGenerator: userOrIpKey,
+    windowTimeInMs: 10 * 60 * 1000, maxLimit: 10, message: "Too many OTP requests.", keyGenerator: userOrIpKey,
   }),
 
 

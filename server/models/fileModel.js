@@ -5,6 +5,10 @@ const fileSchema = new Schema({
         type: String,
         required: true,
     },
+    size: {
+        type: Number,
+        required: true,
+    },
     userId: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -18,7 +22,8 @@ const fileSchema = new Schema({
         required: true
     }
 }, {
-    strict: 'throw'
+    strict: 'throw',
+    timestamps: true,
 })
 
 

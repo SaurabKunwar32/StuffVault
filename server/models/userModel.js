@@ -1,5 +1,6 @@
 import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import { required } from "zod/mini";
 
 const userSchema = new Schema(
   {
@@ -45,6 +46,11 @@ const userSchema = new Schema(
       enum: ["local", "google", "github"],
       default: "local"
     },
+    maxStorageInBytes: {
+      type: Number,
+      required: true,
+      default: 1 * 1024 ** 3,
+    }
   },
   {
     strict: "throw",

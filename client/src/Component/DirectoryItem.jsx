@@ -1,6 +1,9 @@
 import React from 'react'
 import { Folder, FileText, FileImage, FileVideo, FileArchive, FileCode, File, MoreVertical, Music, } from "lucide-react";
 import ContextMenu from './ContextMenu.jsx'
+import GridView from './Views/GridView.jsx';
+import ListView from './Views/ListView.jsx';
+import UploadToast from './UploadToast.jsx';
 
 
 export default function DirectoryItem({
@@ -17,11 +20,13 @@ export default function DirectoryItem({
   openDetailsPopup,
   setDeleteItem,
   setShowDeleteModal,
+  showInLines,
   BASE_URL,
+  uploadXhrMap,
+  progressMap
 }) {
 
   // Convert the file icon string to the actual Icon component
-
   function renderFileIcon(iconString) {
     switch (iconString) {
       case "pdf":
@@ -46,60 +51,83 @@ export default function DirectoryItem({
         return <File className="text-gray-500" />;
     }
   }
+
   const isUploadingItem = item.id.startsWith("temp-");
+  // console.log(isUploading);
+  // console.log(progressMap);
 
   return (
-
     <div
-      className="hoverable-row flex flex-col relative gap-1 border border-gray-300 rounded bg-gray-50 cursor-pointer hover:bg-gray-100 mx-6"
-      onClick={() =>
-        !(activeContextMenu || isUploading)
-          ? handleRowClick(item.isDirectory ? "directory" : "file", item.id)
-          : null
+      className={
+        showInLines
+          ? "hoverable-row relative flex flex-col gap-1 border border-gray-300 rounded bg-gray-50 cursor-pointer hover:bg-gray-100 mx-6"
+          : "relative w-fit"
       }
-      onContextMenu={(e) => handleContextMenu(e, item.id)}
+      onClick={() => {
+        if (!showInLines) return;
+        if (activeContextMenu || isUploading) return;
+        handleRowClick(item.isDirectory ? "directory" : "file", item.id);
+      }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        handleContextMenu(e, item.id);
+      }}
     >
-      <div className="item-left-container flex items-center gap-2">
-        <div className="item-left flex items-center gap-2 p-2.5 flex-grow">
-          {item.isDirectory ? (
-            <Folder
-              className="text-orange-400"
-              size={24}
-              strokeWidth={2}
-            />
-          ) : (
-            renderFileIcon(getFileIcon(item.name))
-          )}
-          <span>{item.name}</span>
-        </div>
 
-        {/* Three dots for context menu */}
-        <div
-          className="context-menu-trigger flex items-center justify-center text-xl cursor-pointer ml-auto text-gray-900 rounded-full p-2 mr-1 hover:bg-gray-300"
-          onClick={(e) => handleContextMenu(e, item.id)}
-        >
-          <MoreVertical size={20} strokeWidth={2} />
-        </div>
-      </div>
-      
+      {showInLines ? (
+        <ListView
+          item={item}
+          handleContextMenu={handleContextMenu}
+          getFileIcon={getFileIcon}
+          renderFileIcon={renderFileIcon}
+        />
+      ) : (
+        <GridView
+          item={item}
+          handleRowClick={handleRowClick}
+          handleContextMenu={handleContextMenu}
+          activeContextMenu={activeContextMenu}
+          isUploading={isUploading}
+          getFileIcon={getFileIcon}
+          renderFileIcon={renderFileIcon}
+        />
+      )}
 
-      {/* PROGRESS BAR: shown if an item is in queue or actively uploading */}
-      {isUploadingItem && (
-        <div className="progress-container bg-gray-600 rounded mt-1.5 mb-2 overflow-hidden relative mx-2.5">
-          <span className="progress-value absolute text-xs left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white">
+      {/* Upload progress */}
+      {/* <div className=''> {isUploadingItem && (
+        <div className="bg-gray-600 rounded mt-1.5 mb-2 overflow-hidden relative mx-2.5">
+          <span className="absolute text-xs inset-0 flex items-center justify-center text-white">
             {Math.floor(uploadProgress)}%
           </span>
           <div
-            className="progress-bar bg-blue-600 rounded h-4"
+            className="h-4 rounded"
             style={{
               width: `${uploadProgress}%`,
               backgroundColor: uploadProgress === 100 ? "#039203" : "#007bff",
             }}
-          ></div>
+          />
         </div>
       )}
+      </div> */}
+      {/* {isUploadingItem
+        &&
+        <UploadToast
+          fileName={item.name}
+          progress={Math.floor(uploadProgress)}
+        />
+      } */}
 
-      {/* Context menu, if active */}
+      {progressMap[item.id] !== undefined && (
+        <UploadToast
+          fileName={item.name}
+          progress={Math.floor(progressMap[item.id])}
+          onCancel={() => handleCancelUpload(item.id)}
+        />
+      )}
+
+
+
+      {/* Context menu */}
       {activeContextMenu === item.id && (
         <ContextMenu
           item={item}
@@ -114,7 +142,6 @@ export default function DirectoryItem({
         />
       )}
     </div>
-
 
   )
 }

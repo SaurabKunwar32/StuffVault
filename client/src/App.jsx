@@ -5,6 +5,7 @@ import Login from "./Forms/Login";
 import VerifyOtp from "./Forms/VerifyOtp.jsx";
 import UsersPage from "./Component/UsersPage.jsx";
 import Settings from "./Component/Settings.jsx";
+import UploadToast from "./Component/UploadToast.jsx";
 
 const router = createBrowserRouter([
   {
@@ -14,6 +15,14 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegistrationForm />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/upload",
+    element: <UploadToast />,
   },
   {
     path: "/login",

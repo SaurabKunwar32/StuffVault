@@ -40,7 +40,7 @@ export default function Verify() {
         try {
             const res = await registerUser({ ...formData, otp });
             setSuccessMsg(res.message || "Account created successfully! Redirecting to login...");
-            setTimeout(() => navigate("/"), 2000);
+            setTimeout(() => navigate("/login"), 1000);
         } catch (err) {
             setServerError(err.response?.data?.error || "Failed to register user.");
         }

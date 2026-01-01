@@ -4,6 +4,7 @@ import File from "../models/fileModel.js";
 import { createDirectorySchema, renameDirectorySchema } from "../validators/authSchema.js";
 import z from "zod";
 import { sanitizeInput } from "../utils/sanitize.js";
+import updateDirectoriesSize from "../utils/updateDirectoriesSize.js";
 
 // const clean = purify.sanitize('<b>hello there</b>');
 
@@ -33,6 +34,9 @@ export const getDirectory = async (req, res, next) => {
 
         const directories = await Directory.find({ parentDirId: _id }).lean();
 
+        // console.log(directorydata);
+        // console.log(directories);
+        // console.log(files);
         return res.status(200).json({
             ...directorydata,
             files: files.map((fil) => ({ ...fil, id: fil._id })),
@@ -47,7 +51,7 @@ export const createDirectory = async (req, res, next) => {
     const user = req.user;
 
     if (!req.headers['x-csrf-check']) {
-        return res.status(404).json({error:"Some headers are missing !!"})
+        return res.status(404).json({ error: "Some headers are missing !!" })
     }
 
     const { success, data, error } = createDirectorySchema.safeParse({
@@ -123,7 +127,6 @@ export const deleteDirectory = async (req, res, next) => {
             _id: id,
             userId: req.user._id,
         })
-            .select("_id")
             .lean();
 
         if (!directoryData) {
@@ -168,6 +171,8 @@ export const deleteDirectory = async (req, res, next) => {
                 $in: [...directories.map(({ _id }) => _id), id],
             },
         });
+
+        await updateDirectoriesSize(directoryData.parentDirId, -directoryData.size)
 
     } catch (err) {
         next(err)

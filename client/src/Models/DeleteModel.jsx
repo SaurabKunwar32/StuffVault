@@ -28,13 +28,14 @@ function DeleteModal({ onClose, onDelete, deleteType, deleteName }) {
           Delete {deleteType === "file" ? "File" : "Folder"}
         </h2>
 
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to delete{" "}
+        <p className="text-gray-600 mb-2">
+          Are you sure you want to delete
           <span className="font-semibold text-gray-900">
             {deleteName || "this item"}
           </span>
-          ? This action cannot be undone.
+          ?
         </p>
+        <p className="text-gray-600 mb-4"> This action cannot be undone !!</p>
 
         <div className="flex justify-end gap-3">
           <button

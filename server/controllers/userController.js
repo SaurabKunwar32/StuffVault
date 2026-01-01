@@ -12,6 +12,7 @@ import z from "zod";
 import { sanitizeObject } from "../utils/sanitize.js";
 
 export const register = async (req, res, next) => {
+  // console.log(req.body);
 
   const sanitizedData = sanitizeObject(req.body)
 
@@ -35,7 +36,6 @@ export const register = async (req, res, next) => {
     });
   }
 
-
   const otpRecord = await OTP.findOne({ email, otp });
 
   if (!otpRecord) {
@@ -43,7 +43,6 @@ export const register = async (req, res, next) => {
   }
 
   await otpRecord.deleteOne();
-
 
   const session = await mongoose.startSession();
 
@@ -78,6 +77,7 @@ export const register = async (req, res, next) => {
     return res.status(201).json({ message: "User Registered successfully !!" });
   } catch (err) {
     await session.abortTransaction();
+    // console.dir(err.errInfo.details, { depth: null });
 
     if (err.code === 121) {
       return res
@@ -119,11 +119,7 @@ export const login = async (req, res, next) => {
   if (!user.password)
     return res.status(400).json({ error: "No password set for this account" });
 
-  // console.log(user.password);
-
   const isPasswordValid = await bcrypt.compare(password, user.password);
-  // console.log(isPasswordValid);
-  // return
 
   if (!isPasswordValid) {
     return res.status(404).json({ error: "Invalid credentials !!" });
@@ -160,7 +156,8 @@ export const login = async (req, res, next) => {
 
 export const getCurrentUser = async (req, res) => {
   const user = await User.findById(req.user._id).lean()
-  // console.log(req.user);
+  const rootDir = await Directory.findById(user.rootdirId).lean();
+  // console.log(rootDir);
   res.status(200).json({
     name: user.name,
     email: user.email,
@@ -168,6 +165,8 @@ export const getCurrentUser = async (req, res) => {
     role: user.role,
     authProvider: user.authProvider,
     hasPassword: !!user.password,
+    maxStorageInBytes: user.maxStorageInBytes,
+    usedStorageInBytes: rootDir.size
   });
 };
 

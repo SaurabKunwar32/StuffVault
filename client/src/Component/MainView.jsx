@@ -13,11 +13,12 @@ import { getDirectoryItems, createDirectory, deleteDirectory, renameDirectory } 
 export default function DirectoryView() {
 
   const BASE_URL = "http://localhost:3000";
+
   const { dirId } = useParams();
   const navigate = useNavigate();
 
   // Displayed directory name
-  const [directoryName, setDirectoryName] = useState("Storix");
+  const [directoryName, setDirectoryName] = useState("StuffVault");
 
   // Lists of items
   const [directoriesList, setDirectoriesList] = useState([]);
@@ -47,10 +48,11 @@ export default function DirectoryView() {
   const [activeContextMenu, setActiveContextMenu] = useState(null);
   const [contextMenuPos, setContextMenuPos] = useState({ x: 0, y: 0 });
 
-  // Details
+  // Details and ui
   const [detailsItem, setDetailsItem] = useState(null);
+  const [showInLines, SetShowInLines] = useState(false)
 
-
+  // console.log(showInLines);
   // Delete modal states
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
@@ -58,7 +60,7 @@ export default function DirectoryView() {
 
 
   const openDetailsPopup = (item) => {
-    console.log(item);
+    // console.log(item);
     setDetailsItem(item);
   };
 
@@ -105,8 +107,9 @@ export default function DirectoryView() {
   const loadDirectory = async () => {
     try {
       const data = await getDirectoryItems(dirId);
-      setDirectoryName(dirId ? data.name : "My Drive");
+      setDirectoryName(dirId ? data.name : "StuffVault");
       setDirectoriesList([...data.directories].reverse());
+      // console.log("lodinding dir", data);
       setFilesList([...data.files].reverse());
     } catch (err) {
       // console.log(err.response.data);
@@ -176,13 +179,16 @@ export default function DirectoryView() {
   function handleFileSelect(e) {
     // console.log(e.target.files[0].name);
     const selectedFiles = Array.from(e.target.files);
+    // console.log(e.target.files);
     if (selectedFiles.length === 0) return;
 
     const newItems = selectedFiles.map((file) => {
       const tempId = `temp-${Date.now()}-${Math.random()}`;
+      // console.log(file);
       return {
         file,
         name: file.name,
+        size: file.size,
         id: tempId,
         isUploading: false
       }
@@ -190,6 +196,7 @@ export default function DirectoryView() {
 
     // Put them at the top of the existing list
     setFilesList((prev) => [...newItems, ...prev]);
+
 
     // Initialize progress=0 for each
     newItems.forEach((item) => {
@@ -212,6 +219,38 @@ export default function DirectoryView() {
   }
 
 
+
+  // hide upload toast logic
+  function hidetheToast(fileId) {
+    // stop uploading state
+    setIsUploading(false);
+
+    // clear remaining queue
+    setUploadQueue([]);
+
+    // remove progress → toast disappears
+    setProgressMap((prev) => {
+      const next = { ...prev };
+      delete next[fileId];
+      return next;
+    });
+
+    // cleanup xhr reference
+    setUploadXhrMap((prev) => {
+      const next = { ...prev };
+      delete next[fileId];
+      return next;
+    });
+
+
+    //  remove the file from UI (server never accepted it)
+    setFilesList((prev) =>
+      prev.filter((file) => file.id !== fileId)
+    );
+  }
+
+
+
   // Upload items in queue one by one
   function processUploadQueue(queue) {
     if (queue.length === 0) {
@@ -226,6 +265,7 @@ export default function DirectoryView() {
 
     // Take first item
     const [currentItem, ...restQueue] = queue
+    // console.log(queue);
 
     // Mark it as uploading true
     setFilesList((prev) =>
@@ -240,8 +280,11 @@ export default function DirectoryView() {
     xhr.open("POST", `${BASE_URL}/file/${dirId || ""}`, true);
     xhr.withCredentials = true;
     xhr.setRequestHeader("filename", currentItem.name)
+    xhr.setRequestHeader("filesize", currentItem.size)
 
+    // progress
     xhr.upload.addEventListener("progress", (evt) => {
+      // console.log(evt);
       if (evt.lengthComputable) {
         const progress = (evt.loaded / evt.total) * 100;
         setProgressMap((prev) => ({ ...prev, [currentItem.id]: progress }))
@@ -250,20 +293,36 @@ export default function DirectoryView() {
 
     xhr.addEventListener("load", () => {
       // Move on the next item
-      processUploadQueue(restQueue)
+      // processUploadQueue(restQueue)
+
+      // only move forward if server truly accepted it
+      if (xhr.status >= 200 && xhr.status < 300) {
+        processUploadQueue(restQueue);
+      }
     })
+
+    // To handle the res.destroy() response properly
+    xhr.onerror = () => {
+      hidetheToast(currentItem.id);
+    };
+
+    xhr.onabort = () => {
+      hidetheToast(currentItem.id);
+    };
 
     // // If user cancels, remove from the queue
     setUploadXhrMap((prev) => ({
       ...prev, [currentItem.id]: xhr
     }))
-    xhr.send(currentItem.file)
 
+    // console.log(currentItem.file);
+    xhr.send(currentItem.file)
   }
 
 
   //  Cancel an in-progress upload
   function handleCancelUpload(tempId) {
+    console.log(tempId);
     const xhr = uploadXhrMap[tempId];
     if (xhr) {
       xhr.abort();
@@ -313,8 +372,6 @@ export default function DirectoryView() {
       setErrorMessage(err.message || "Something went wrong while deleting the file.")
     }
   }
-
-
 
   async function handleCreateDirectory(e) {
     e.preventDefault();
@@ -403,6 +460,7 @@ export default function DirectoryView() {
     e.preventDefault()
     const clickX = e.clientX;
     const clickY = e.clientY;
+    // console.log(id);
 
     if (activeContextMenu === id) {
       setActiveContextMenu(null)
@@ -425,6 +483,8 @@ export default function DirectoryView() {
     ...filesList.map((d) => ({ ...d, isDirectory: false }))
   ]
 
+  // console.log(CombinedItems);
+
 
   useEffect(() => {
     if (!errorMessage) return;
@@ -438,6 +498,7 @@ export default function DirectoryView() {
 
   return (
     <>
+
       {errorMessage &&
         errorMessage !== "Directory not found or you do not have access to it!" && (
           <div className="fixed top-6 right-6 z-50 animate-slide-in">
@@ -471,14 +532,13 @@ export default function DirectoryView() {
         )}
 
 
-
-
       <Header
         directoryName={directoryName}
         onCreateFolderClick={() => setShowCreateDirModal(true)}
         onUploadFilesClick={() => fileInputRef.current.click()}
         fileInputRef={fileInputRef}
         handleFileSelect={handleFileSelect}
+        SetShowInLines={SetShowInLines}
         // Disable if the user doesn't have access
         disabled={
           errorMessage ===
@@ -559,8 +619,10 @@ export default function DirectoryView() {
               contextMenuPos={contextMenuPos}
               handleContextMenu={handleContextMenu}
               getFileIcon={getFileIcon}
+              showInLines={showInLines}
               isUploading={isUploading}
               progressMap={progressMap}
+              uploadXhrMap={uploadXhrMap}
               handleCancelUpload={handleCancelUpload}
               setDeleteItem={setDeleteItem}
               setShowDeleteModal={setShowDeleteModal}

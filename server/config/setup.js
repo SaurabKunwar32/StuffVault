@@ -44,9 +44,6 @@ try {
           picture: {
             bsonType: 'string',
           },
-          __v: {
-            bsonType: "int",
-          },
           role: {
             bsonType: 'string',
             enum: ["Admin", "Manager", "User", "Owner"],
@@ -54,10 +51,16 @@ try {
           isDeleted: {
             bsonType: 'bool'
           },
+          __v: {
+            bsonType: "int",
+          },
           authProvider: {
             bsonType: 'string',
             enum: ["local", "google", "github"],
           },
+          maxStorageInBytes: {
+            bsonType: ["int", "long"]
+          }
         },
         additionalProperties: false
       }
@@ -85,11 +88,20 @@ try {
           name: {
             bsonType: 'string',
           },
+          size: {
+            bsonType: 'int'
+          },
           parentDirId: {
             bsonType: ['objectId', 'null'],
           },
           userId: {
             bsonType: 'objectId',
+          },
+          createdAt: {
+            bsonType: "date",
+          },
+          updatedAt: {
+            bsonType: "date",
           },
           __v: {
             bsonType: "int",
@@ -116,6 +128,9 @@ try {
           name: {
             bsonType: "string",
           },
+          size: {
+            bsonType: "int",
+          },
           extension: {
             bsonType: "string",
           },
@@ -124,6 +139,12 @@ try {
           },
           parentDirId: {
             bsonType: "objectId",
+          },
+          createdAt: {
+            bsonType: 'date'
+          },
+          updatedAt: {
+            bsonType: 'date'
           },
           __v: {
             bsonType: "int",
