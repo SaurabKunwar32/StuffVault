@@ -5,47 +5,95 @@ import { createDirectorySchema, renameDirectorySchema } from "../validators/auth
 import z from "zod";
 import { sanitizeInput } from "../utils/sanitize.js";
 import updateDirectoriesSize from "../utils/updateDirectoriesSize.js";
+import { buildLogicalPath, generateBreadCrumb } from "../utils/logicalPath.js";
 
-// const clean = purify.sanitize('<b>hello there</b>');
 
 export const getDirectory = async (req, res, next) => {
-    // console.log(req.user);
-    if (req.user.isDeleted) {
-        return res.status(403).json({
-            error: "Your account has been deleted. To recover, please contact the Admin."
-        });
-    }
-
-    // const db = req.db
-    // const dirCollection = db.collection('directories')
-    const user = req.user;
-    const _id = req.params.id || user.rootdirId.toString();
-
     try {
-        const directorydata = await Directory.findOne({ _id, userId: req.user._id }).lean();
-
-        if (!directorydata) {
-            return res
-                .status(404)
-                .json({ error: "Directory not found or you do not have access to it!" });
+        // 1️ Block deleted users
+        if (req.user.isDeleted) {
+            return res.status(403).json({
+                error: "Your account has been deleted. To recover, please contact the Admin.",
+            });
         }
 
-        const files = await File.find({ parentDirId: directorydata._id }).lean();
+        const userId = req.user._id;
+        const dirId = req.params.id || req.user.rootdirId;
 
-        const directories = await Directory.find({ parentDirId: _id }).lean();
+        //  Load directory (or root)
+        const directoryData = await Directory.findOne({ _id: dirId, userId })
+            .populate("path", "name")
+            .lean()
 
-        // console.log(directorydata);
-        // console.log(directories);
-        // console.log(files);
+        if (!directoryData) {
+            return res.status(404).json({
+                error: "Directory not found or you do not have access to it!",
+            });
+        }
+
+        // Load files inside directory
+        const files = (
+            await File.find({
+                parentDirId: directoryData._id,
+            }).lean()
+        ).map((file) => ({
+            ...file,
+            id: file._id,
+            type: "file",
+            path: buildLogicalPath([...directoryData.path, file]),
+        }));
+
+        // console.log(directoryData.path);
+        // console.log({ files });
+
+        // Load child directories of current directory
+        const childDirs = await Directory.find({
+            parentDirId: directoryData._id,
+        }).lean();
+
+        // console.log({ directoryData });
+        // console.log({ childDirs });
+
+        const directories = await Promise.all(
+            childDirs.map(async (dir) => {
+                // count no of files and dir in the children dir of current dir
+                const [fileCount, directoryCount] = await Promise.all([
+                    File.countDocuments({
+                        parentDirId: dir._id,
+                    }),
+                    Directory.countDocuments({ parentDirId: dir._id }),
+                ]);
+
+                return {
+                    ...dir,
+                    id: dir._id,
+                    // type: "directory",
+                    path: buildLogicalPath([...directoryData.path, dir]),
+                    fileCount,
+                    directoryCount,
+                };
+            })
+        );
+
+        // 5️⃣ Final response
         return res.status(200).json({
-            ...directorydata,
-            files: files.map((fil) => ({ ...fil, id: fil._id })),
-            directories: directories.map((dir) => ({ ...dir, id: dir._id })),
+            ...directoryData,
+            files,
+            directories,
+            breadCrumb: generateBreadCrumb(directoryData.path)
         });
+
+
+        //  return res.status(200).json({
+        //     ...directorydata,
+        //     files: files.map((fil) => ({ ...fil, id: fil._id })),
+        //     directories: directories.map((dir) => ({ ...dir, id: dir._id })),
+        // });
     } catch (err) {
-        next(err)
+        next(err);
     }
 };
+
 
 export const createDirectory = async (req, res, next) => {
     const user = req.user;
@@ -69,18 +117,23 @@ export const createDirectory = async (req, res, next) => {
     const dirname = sanitizeInput(headers.dirname) || "New Folder";
 
     try {
-        const parentDir = await Directory.findOne({ _id: parentDirId }).lean();
+        const parentDir = await Directory.findOne({ _id: parentDirId, userId: user._id }).lean();
 
+        // console.log({ parentDirId });
         if (!parentDir)
             return res
                 .status(404)
                 .json({ message: "Parent Directory  does not exist !!" });
 
-        await Directory.insertOne({
+        const newDir = await Directory.insertOne({
             name: dirname,
             parentDirId,
             userId: user._id,
         });
+        newDir.path = [...(parentDir.path || []), newDir._id];
+        await newDir.save();
+
+        // console.log({ newDir })
 
         return res.status(201).json({ message: "Directory created !!" });
     } catch (err) {

@@ -57,8 +57,9 @@ export default function DirectoryView() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteItem, setDeleteItem] = useState(null);
 
+  const [breadCrumb, setBreadCrumb] = useState([])
 
-
+  // console.log(breadCrumb);
   const openDetailsPopup = (item) => {
     // console.log(item);
     setDetailsItem(item);
@@ -107,6 +108,7 @@ export default function DirectoryView() {
   const loadDirectory = async () => {
     try {
       const data = await getDirectoryItems(dirId);
+      setBreadCrumb(data.breadCrumb)
       setDirectoryName(dirId ? data.name : "StuffVault");
       setDirectoriesList([...data.directories].reverse());
       // console.log("lodinding dir", data);
@@ -483,6 +485,8 @@ export default function DirectoryView() {
     ...filesList.map((d) => ({ ...d, isDirectory: false }))
   ]
 
+
+  // console.log(CombinedItems);
   // console.log(CombinedItems);
 
 
@@ -596,7 +600,7 @@ export default function DirectoryView() {
 
 
 
-      {
+      {/* {
         CombinedItems.length === 0 ?
           (
             // Check if the error is specifically the "no access" error
@@ -611,10 +615,11 @@ export default function DirectoryView() {
               </p>
             )
           )
-          : (
+          : ( */}
             <DirectoryList
               items={CombinedItems}
               handleRowClick={handleRowClick}
+              errorMessage={errorMessage}
               activeContextMenu={activeContextMenu}
               contextMenuPos={contextMenuPos}
               handleContextMenu={handleContextMenu}
@@ -628,10 +633,11 @@ export default function DirectoryView() {
               setShowDeleteModal={setShowDeleteModal}
               openRenameModal={openRenameModal}
               openDetailsPopup={openDetailsPopup}
+              breadCrumb={breadCrumb}
               BASE_URL={BASE_URL}
             />
-          )
-      }
+          {/* ) */}
+      {/* } */}
     </>
   )
 }

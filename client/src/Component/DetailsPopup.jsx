@@ -23,9 +23,9 @@ function DetailsPopup({ item, onClose }) {
     numberOfFolders: 0,
   });
 
-  const { id, name, isDirectory, size, createdAt, updatedAt } = item;
-  const { path, numberOfFiles, numberOfFolders } =
-    details;
+  const { id, name, isDirectory, size, createdAt, updatedAt, path, directoryCount
+    , fileCount
+  } = item;
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -37,6 +37,7 @@ function DetailsPopup({ item, onClose }) {
 
 
 
+  // console.log(item);
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
@@ -66,11 +67,13 @@ function DetailsPopup({ item, onClose }) {
           {isDirectory && (
             <>
               <div>
-                <span className="font-semibold">Files:</span> {numberOfFiles}
+                <span className="font-semibold">Files:</span> {fileCount
+                }
               </div>
               <div>
-                <span className="font-semibold">Folders:</span>{" "}
-                {numberOfFolders}
+                <span className="font-semibold">Folders:</span>
+                {directoryCount
+                }
               </div>
             </>
           )}

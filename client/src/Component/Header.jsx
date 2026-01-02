@@ -28,7 +28,7 @@ export default function Header({
 
   // const BASE_URL = "http://localhost:3000";
 
-  const [showUserMenu, setShowUserMenu] = useState(true);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState("Guest User");
   const [userRole, setUserRole] = useState("User");

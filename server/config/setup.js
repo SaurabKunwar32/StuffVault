@@ -79,7 +79,8 @@ try {
           '_id',
           'name',
           'parentDirId',
-          'userId'
+          'userId',
+          'size'
         ],
         properties: {
           _id: {
@@ -88,14 +89,20 @@ try {
           name: {
             bsonType: 'string',
           },
-          size: {
-            bsonType: 'int'
-          },
           parentDirId: {
             bsonType: ['objectId', 'null'],
           },
           userId: {
             bsonType: 'objectId',
+          },
+          size: {
+            bsonType: 'int'
+          },
+          path: {
+            bsonType: "array",
+            items: {
+              bsonType: "objectId",
+            }
           },
           createdAt: {
             bsonType: "date",
