@@ -112,9 +112,19 @@ export const uploadFile = async (req, res, next) => {
                 await rm(filePath);
                 return req.destroy()
             }
-            // handle the backpressure .............
-            writeStream.write(chunk);
+            const canWrite = writeStream.write(chunk); //backpressure  occur
+            if (!canWrite) {
+                req.pause();
+            }
         })
+
+        // backpressure is handled here
+        writeStream.on("drain", () => {
+            if (!aborted) {
+                req.resume(); // resume when buffer is free
+            }
+        });
+
 
         req.on("aborted", async () => {
             console.log("Client canceled the upload");
