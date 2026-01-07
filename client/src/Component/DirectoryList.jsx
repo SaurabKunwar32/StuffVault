@@ -1,5 +1,5 @@
-import { ChevronRight, Home } from 'lucide-react';
-import DirectoryItem from './DirectoryItem'
+import { ChevronRight, Home } from "lucide-react";
+import DirectoryItem from "./DirectoryItem";
 import { Link } from "react-router-dom";
 
 export default function DirectoryList({
@@ -18,29 +18,17 @@ export default function DirectoryList({
   showInLines,
   errorMessage,
   openDetailsPopup,
-  uploadXhrMap,
   breadCrumb,
   BASE_URL,
 }) {
-
   // const breadcrumb=[{saurab},{fjsf}]
   // console.log(breadCrumb);
   // console.log(items.length);
   return (
-
-    // <div className='flex flex-col gap-2.5 mt-5'>
     <>
-      {/* {breadCrumb.map((dir, index) => (
-        <span key={dir.id}>
-          <Link to={`/directory/${dir.id}`}>{dir.name}</Link>
-          {index < breadCrumb.length - 1 && " / "}
-        </span>
-      ))} */}
-
       {/* Breadcrumb Bar */}
       <div className="w-full bg-white/80 backdrop-blur border-b border-gray-200 px-6 py-2.5 sticky top-0 z-40">
         <div className="flex items-center gap-2 text-sm text-gray-600 overflow-x-auto whitespace-nowrap scrollbar-hide">
-
           {/* Home */}
           <Link
             to="/"
@@ -80,62 +68,54 @@ export default function DirectoryList({
         </div>
       </div>
 
-      {items.length === 0
-        ?
-        (
-          // Check if the error is specifically the "no access" error
-          errorMessage ===
-            "Directory not found or you do not have access to it!" ? (
-            <p className="mt-6 text-center text-lg font-bold text-red-700">
-              Directory not found or you do not have access to it!
-            </p>
-          ) : (
-            <p className="mt-6 text-center text-lg font-medium text-gray-400">
-              This folder is empty. Upload files or create a folder to see some data.
-            </p>
-          )
+      {items.length === 0 ? (
+        // Check if the error is specifically the "no access" error
+        errorMessage ===
+        "Directory not found or you do not have access to it!" ? (
+          <p className="mt-6 text-center text-lg font-bold text-red-700">
+            Directory not found or you do not have access to it!
+          </p>
+        ) : (
+          <p className="mt-6 text-center text-lg font-medium text-gray-400">
+            This folder is empty. Upload files or create a folder to see some
+            data.
+          </p>
         )
-        :
-
-
-        <div className={
-          showInLines
-            ? "flex flex-col gap-2.5 mt-5"
-            : "grid grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-4  px-10 mt-5"
-        }>
-
-          {
-            items.map((item) => {
-              const uploadProgress = progressMap[item.id] || 0;
-              // console.log(uploadProgress);
-
-              return (
-                <DirectoryItem
-                  key={item.id}
-                  item={item}
-                  showInLines={showInLines}
-                  handleRowClick={handleRowClick}
-                  activeContextMenu={activeContextMenu}
-                  contextMenuPos={contextMenuPos}
-                  handleContextMenu={handleContextMenu}
-                  getFileIcon={getFileIcon}
-                  isUploading={isUploading}
-                  uploadProgress={uploadProgress}
-                  handleCancelUpload={handleCancelUpload}
-                  setDeleteItem={setDeleteItem}
-                  setShowDeleteModal={setShowDeleteModal}
-                  openRenameModal={openRenameModal}
-                  openDetailsPopup={openDetailsPopup}
-                  BASE_URL={BASE_URL}
-                  progressMap={progressMap}
-                  uploadXhrMap={uploadXhrMap}
-                />
-              )
-            })
+      ) : (
+        <div
+          className={
+            showInLines
+              ? "flex flex-col gap-2.5 mt-5"
+              : "grid grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-4  px-10 mt-5"
           }
-        </div>
-      }
+        >
+          {items.map((item) => {
+            const uploadProgress = progressMap[item.id] || 0;
 
+            return (
+              <DirectoryItem
+                key={item.id}
+                item={item}
+                showInLines={showInLines}
+                handleRowClick={handleRowClick}
+                activeContextMenu={activeContextMenu}
+                contextMenuPos={contextMenuPos}
+                handleContextMenu={handleContextMenu}
+                getFileIcon={getFileIcon}
+                isUploading={isUploading}
+                uploadProgress={uploadProgress}
+                handleCancelUpload={handleCancelUpload}
+                setDeleteItem={setDeleteItem}
+                setShowDeleteModal={setShowDeleteModal}
+                openRenameModal={openRenameModal}
+                openDetailsPopup={openDetailsPopup}
+                BASE_URL={BASE_URL}
+                progressMap={progressMap}
+              />
+            );
+          })}
+        </div>
+      )}
     </>
-  )
+  );
 }

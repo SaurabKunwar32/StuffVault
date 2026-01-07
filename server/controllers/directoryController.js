@@ -75,7 +75,7 @@ export const getDirectory = async (req, res, next) => {
             })
         );
 
-        // 5️⃣ Final response
+        // Final response
         return res.status(200).json({
             ...directoryData,
             files,

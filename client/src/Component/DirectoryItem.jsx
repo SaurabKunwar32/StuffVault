@@ -1,10 +1,19 @@
-import React from 'react'
-import { Folder, FileText, FileImage, FileVideo, FileArchive, FileCode, File, MoreVertical, Music, } from "lucide-react";
-import ContextMenu from './ContextMenu.jsx'
-import GridView from './Views/GridView.jsx';
-import ListView from './Views/ListView.jsx';
-import UploadToast from './UploadToast.jsx';
-
+import React from "react";
+import {
+  Folder,
+  FileText,
+  FileImage,
+  FileVideo,
+  FileArchive,
+  FileCode,
+  File,
+  MoreVertical,
+  Music,
+} from "lucide-react";
+import ContextMenu from "./ContextMenu.jsx";
+import GridView from "./Views/GridView.jsx";
+import ListView from "./Views/ListView.jsx";
+import UploadToast from "./UploadToast.jsx";
 
 export default function DirectoryItem({
   item,
@@ -22,10 +31,8 @@ export default function DirectoryItem({
   setShowDeleteModal,
   showInLines,
   BASE_URL,
-  uploadXhrMap,
-  progressMap
+  progressMap,
 }) {
-
   // Convert the file icon string to the actual Icon component
   function renderFileIcon(iconString) {
     switch (iconString) {
@@ -73,7 +80,6 @@ export default function DirectoryItem({
         handleContextMenu(e, item.id);
       }}
     >
-
       {showInLines ? (
         <ListView
           item={item}
@@ -93,30 +99,6 @@ export default function DirectoryItem({
         />
       )}
 
-      {/* Upload progress */}
-      {/* <div className=''> {isUploadingItem && (
-        <div className="bg-gray-600 rounded mt-1.5 mb-2 overflow-hidden relative mx-2.5">
-          <span className="absolute text-xs inset-0 flex items-center justify-center text-white">
-            {Math.floor(uploadProgress)}%
-          </span>
-          <div
-            className="h-4 rounded"
-            style={{
-              width: `${uploadProgress}%`,
-              backgroundColor: uploadProgress === 100 ? "#039203" : "#007bff",
-            }}
-          />
-        </div>
-      )}
-      </div> */}
-      {/* {isUploadingItem
-        &&
-        <UploadToast
-          fileName={item.name}
-          progress={Math.floor(uploadProgress)}
-        />
-      } */}
-
       {progressMap[item.id] !== undefined && (
         <UploadToast
           fileName={item.name}
@@ -124,8 +106,6 @@ export default function DirectoryItem({
           onCancel={() => handleCancelUpload(item.id)}
         />
       )}
-
-
 
       {/* Context menu */}
       {activeContextMenu === item.id && (
@@ -142,6 +122,5 @@ export default function DirectoryItem({
         />
       )}
     </div>
-
-  )
+  );
 }

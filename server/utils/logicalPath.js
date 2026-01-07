@@ -25,7 +25,7 @@ export const buildLogicalPath = (pathArray = []) => {
   let path = "StuffVault";
 
   pathArray.forEach((dir) => {
-    path += `/${dir.name}`;
+    path += ` / ${dir.name}`;
   });
 
   // if (file) {
