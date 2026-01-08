@@ -9,100 +9,91 @@ try {
   const command = "collMod";
 
   await db.command({
-    [command]: 'users',
+    [command]: "users",
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: [
-          '_id',
-          'name',
-          'email',
-          'rootdirId'
-        ],
+        required: ["_id", "name", "email", "rootdirId"],
         properties: {
           _id: {
-            bsonType: 'objectId'
+            bsonType: "objectId",
           },
           name: {
-            bsonType: 'string',
+            bsonType: "string",
             minLength: 3,
-            description: 'Name must be a string with at least 3 characters'
+            description: "Name must be a string with at least 3 characters",
           },
           email: {
-            bsonType: 'string',
-            pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$',
-            description: 'Email must be a valid email address'
+            bsonType: "string",
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$",
+            description: "Email must be a valid email address",
           },
           password: {
-            bsonType: 'string',
+            bsonType: "string",
             minLength: 4,
-            description: 'Password must be at least 4 characters long'
+            description: "Password must be at least 4 characters long",
+          },
+          maxStorageInBytes: {
+            bsonType: "long",
           },
           rootdirId: {
-            bsonType: 'objectId',
+            bsonType: "objectId",
           },
           picture: {
-            bsonType: 'string',
+            bsonType: "string",
           },
           role: {
-            bsonType: 'string',
+            bsonType: "string",
             enum: ["Admin", "Manager", "User", "Owner"],
           },
           isDeleted: {
-            bsonType: 'bool'
+            bsonType: "bool",
           },
           __v: {
             bsonType: "int",
           },
           authProvider: {
-            bsonType: 'string',
+            bsonType: "string",
             enum: ["local", "google", "github"],
           },
           maxStorageInBytes: {
-            bsonType: ["int", "long"]
-          }
+            bsonType: ["int", "long"],
+          },
         },
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     },
-    validationAction: 'error',
-    validationLevel: 'strict'
-  })
-
+    validationAction: "error",
+    validationLevel: "strict",
+  });
 
   await db.command({
-    [command]: 'directories',
+    [command]: "directories",
     validator: {
       $jsonSchema: {
         bsonType: "object",
-        required: [
-          '_id',
-          'name',
-          'parentDirId',
-          'userId',
-          'size'
-        ],
+        required: ["_id", "name", "parentDirId", "userId", "size"],
         properties: {
           _id: {
-            bsonType: 'objectId'
+            bsonType: "objectId",
           },
           name: {
-            bsonType: 'string',
+            bsonType: "string",
           },
           parentDirId: {
-            bsonType: ['objectId', 'null'],
+            bsonType: ["objectId", "null"],
           },
           userId: {
-            bsonType: 'objectId',
+            bsonType: "objectId",
           },
           size: {
-            bsonType: 'int'
+            bsonType: "int",
           },
           path: {
             bsonType: "array",
             items: {
               bsonType: "objectId",
-            }
+            },
           },
           createdAt: {
             bsonType: "date",
@@ -114,13 +105,12 @@ try {
             bsonType: "int",
           },
         },
-        additionalProperties: false
-      }
+        additionalProperties: false,
+      },
     },
-    validationAction: 'error',
-    validationLevel: 'strict'
-  })
-
+    validationAction: "error",
+    validationLevel: "strict",
+  });
 
   await db.command({
     [command]: "files",
@@ -148,10 +138,10 @@ try {
             bsonType: "objectId",
           },
           createdAt: {
-            bsonType: 'date'
+            bsonType: "date",
           },
           updatedAt: {
-            bsonType: 'date'
+            bsonType: "date",
           },
           __v: {
             bsonType: "int",
@@ -163,7 +153,6 @@ try {
     validationAction: "error",
     validationLevel: "strict",
   });
-
 } catch (err) {
   console.log("Error setting up the database", err);
 } finally {

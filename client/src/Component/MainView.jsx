@@ -8,7 +8,7 @@ import RenameModal from "../Models/RenameModal.jsx";
 import DetailsPopup from "./DetailsPopup.jsx";
 import DeleteModal from "../Models/DeleteModel.jsx";
 
-import { deleteFile, renameFile } from "../apis/fileApi.js";
+import { deleteFile, renameFile, uploadInitiate } from "../apis/fileApi.js";
 import {
   getDirectoryItems,
   createDirectory,
@@ -139,7 +139,7 @@ export default function DirectoryView() {
 
   //   FILE UPLOAD (SINGLE FILE)
 
-  function handleFileSelect(e) {
+  async function handleFileSelect(e) {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -159,22 +159,30 @@ export default function DirectoryView() {
       isUploading: true,
     };
 
+    const data = await uploadInitiate({
+      name: file.name,
+      size: file.size,
+      contentType: file.type,
+      parentDirId: dirId,
+    });
+
+    const { filId, uploadSignedUrl } = data;
+    // console.log(data);
+
     // Optimistically show the file in the list
     setFilesList((prev) => [tempItem, ...prev]);
     setUploadItem(tempItem);
     e.target.value = "";
 
-    startUpload(tempItem);
+    startUpload({ item: tempItem, uploadUrl: uploadSignedUrl, filId });
   }
 
-  function startUpload(item) {
+  function startUpload({ item, uploadUrl, filId }) {
+    // console.log(uploadUrl);
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
 
-    xhr.open("POST", `${BASE_URL}/file/${dirId || ""}`);
-    xhr.withCredentials = true;
-    xhr.setRequestHeader("filename", item.name);
-    xhr.setRequestHeader("filesize", item.size);
+    xhr.open("PUT", uploadUrl);
 
     xhr.upload.onprogress = (evt) => {
       if (evt.lengthComputable) {
@@ -190,7 +198,7 @@ export default function DirectoryView() {
     };
 
     xhr.onerror = () => {
-      setErrorMessage("Upload failed or insufficient space.");
+      setErrorMessage("Something went wrong !!.");
       // Remove temp item from the list
       setFilesList((prev) => prev.filter((f) => f.id !== item.id));
       setUploadItem(null);
@@ -234,7 +242,6 @@ export default function DirectoryView() {
 
     return response;
   }
-
 
   // Delete a file /directory
   async function handleDeleteDirectory(id) {

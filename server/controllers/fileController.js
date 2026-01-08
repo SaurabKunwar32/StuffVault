@@ -9,6 +9,7 @@ import { sanitizeObject } from "../utils/sanitize.js";
 import { rootPath } from "../app.js";
 import updateDirectoriesSize from "../utils/updateDirectoriesSize.js";
 import User from "../models/userModel.js";
+import { createGetSignedUrl, createUploadSignedUrl } from "../config/s3.js";
 
 export const getFiles = async (req, res) => {
   if (req.user.isDeleted) {
@@ -20,17 +21,30 @@ export const getFiles = async (req, res) => {
 
   const { id } = req.params;
   const fileData = await File.findOne({ _id: id, userId: req.user._id }).lean();
+  // console.log(fileData);
 
   if (!fileData) {
     return res.status(404).json({ message: "File Not found !!" });
   }
 
-  const filePath = `${rootPath}/storage/${id}${fileData.extension}`;
+  // const filePath = `${rootPath}/storage/${id}${fileData.extension}`;
 
   if (req.query.action === "download") {
-    // res.set("Content-Disposition", `attachment; filename=${fileData.name}`);
-    return res.download(filePath, fileData.name);
+    const fileUrl = await createGetSignedUrl({
+      key: `${id}${fileData.extension}`,
+      download: true,
+      fileName: fileData.name,
+    });
+
+    return res.redirect(fileUrl);
   }
+
+  const fileUrl = await createGetSignedUrl({
+    key: `${id}${fileData.extension}`,
+    fileName: fileData.name,
+  });
+
+  return res.redirect(fileUrl);
 
   return res.sendFile(filePath, (err) => {
     if (!res.headersSent) {
@@ -39,127 +53,123 @@ export const getFiles = async (req, res) => {
   });
 };
 
-export const uploadFile = async (req, res, next) => {
-  const parentDirId = req.params.parentDirId || req.user.rootdirId;
-  const MAX_FILE_LIMIT = 100 * 1024 ** 2; //10MB
-  try {
-    const parentDirData = await Directory.findOne({
-      _id: parentDirId,
-      userId: req.user._id,
-    });
+// export const uploadFile = async (req, res, next) => {
+//   const parentDirId = req.params.parentDirId || req.user.rootdirId;
+//   const MAX_FILE_LIMIT = 100 * 1024 ** 2; //10MB
+//   try {
+//     const parentDirData = await Directory.findOne({
+//       _id: parentDirId,
+//       userId: req.user._id,
+//     });
 
-    // Check if parent directory exists
-    if (!parentDirData) {
-      return res.status(404).json({ error: "Parent directory not found!" });
-    }
+//     // Check if parent directory exists
+//     if (!parentDirData) {
+//       return res.status(404).json({ error: "Parent directory not found!" });
+//     }
 
-    const user = await User.findById(req.user._id).lean();
-    const rootDir = await Directory.findById(req.user.rootdirId).lean();
+//     const filename = req.headers.filename || "untitled";
+//     const fileSize = req.headers.filesize;
 
-    // STORAGE CALCULATION
-    const maxStorage = user.maxStorageInBytes;
-    const storageUsed = rootDir?.size || 0;
-    const availableStorage = maxStorage - storageUsed;
+//     const user = await User.findById(req.user._id).lean();
+//     const rootDir = await Directory.findById(req.user.rootdirId).lean();
 
-    const filename = req.headers.filename || "untitled";
-    const extension = path.extname(filename);
-    const fileSize = req.headers.filesize;
+//     const remainingSpace = user.maxStorageInBytes - rootDir.size;
 
-    // File size limit
-    if (fileSize > MAX_FILE_LIMIT) {
-      res.destroy();
-      return res.status(400).json({ error: "File size exceeds 100MB limit." });
-      // res.header("Connection", "close");
-      // return res.end();
-    }
+//     // File size limit
+//     if (fileSize > MAX_FILE_LIMIT) {
+//       res.destroy();
+//       return res.status(400).json({ error: "File size exceeds 100MB limit." });
+//       // res.header("Connection", "close");
+//       // return res.end();
+//     }
 
-    // console.log(fileSize > availableStorage);
-    // STORAGE LIMIT CHECK
-    if (fileSize > availableStorage) {
-      req.destroy();
-      return res.status(400).json({
-        error: `Not enough storage. Available: ${availableStorage} bytes`,
-      });
-    }
+//     // STORAGE LIMIT CHECK
 
-    const insertedFile = await File.insertOne({
-      extension,
-      name: filename,
-      size: fileSize,
-      parentDirId: parentDirData._id,
-      userId: req.user._id,
-    });
+//     if (fileSize > remainingSpace) {
+//       console.log("File too large");
+//       return res.destroy();
+//     }
 
-    const fileId = insertedFile.id;
+//     const extension = path.extname(filename);
 
-    const fullFileName = `${fileId}${extension}`;
-    const filePath = `${rootPath}/storage/${fullFileName}`;
+//     const insertedFile = await File.insertOne({
+//       extension,
+//       name: filename,
+//       size: fileSize,
+//       parentDirId: parentDirData._id,
+//       userId: req.user._id,
+//     });
 
-    const writeStream = createWriteStream(filePath);
-    // req.pipe(writeStream);
+//     const fileId = insertedFile.id;
 
-    let totalFileSize = 0;
-    let aborted = false;
-    let fileUploadCompleted = false;
+//     const fullFileName = `${fileId}${extension}`;
+//     const filePath = `${rootPath}/storage/${fullFileName}`;
 
-    req.on("data", async (chunk) => {
-      if (aborted) return;
-      totalFileSize += chunk.length;
-      if (totalFileSize > fileSize) {
-        // console.log("object");
-        aborted = true;
-        writeStream.close();
-        await insertedFile.deleteOne();
-        await rm(filePath);
-        return req.destroy();
-      }
-      const canWrite = writeStream.write(chunk); //backpressure  occur
-      if (!canWrite) {
-        req.pause();
-      }
-    });
+//     const writeStream = createWriteStream(filePath);
+//     // req.pipe(writeStream);
 
-    // backpressure is handled here
-    writeStream.on("drain", () => {
-      if (!aborted) {
-        req.resume(); // resume when buffer is free
-      }
-    });
+//     let totalFileSize = 0;
+//     let aborted = false;
+//     let fileUploadCompleted = false;
 
-    req.on("end", async () => {
-      fileUploadCompleted = true;
-      await updateDirectoriesSize(parentDirId, totalFileSize);
-      return res.status(201).json({ message: "File Uploaded successfully" });
-    });
+//     req.on("data", async (chunk) => {
+//       if (aborted) return;
+//       totalFileSize += chunk.length;
+//       if (totalFileSize > fileSize) {
+//         // console.log("object");
+//         aborted = true;
+//         writeStream.close();
+//         await insertedFile.deleteOne();
+//         await rm(filePath);
+//         return req.destroy();
+//       }
+//       const canWrite = writeStream.write(chunk); //backpressure  occur
+//       if (!canWrite) {
+//         req.pause();
+//       }
+//     });
 
-    req.on("close", async () => {
-      if (!fileUploadCompleted) {
-        try {
-          writeStream.close();
-          await insertedFile.deleteOne();
-          console.log("file cleaned that was cancled in uploading !!");
-          await rm(filePath);
-          return res
-            .status(201)
-            .json({ message: "Could not Upload file successfully" });
-        } catch (err) {
-          console.error("Error cleaning up aborted upload:", err);
-        }
-      }
-    });
+//     // backpressure is handled here
+//     writeStream.on("drain", () => {
+//       if (!aborted) {
+//         req.resume(); // resume when buffer is free
+//       }
+//     });
 
-    req.on("error", async () => {
-      await File.deleteOne({ _id: insertedFile.insertedId });
-      return res
-        .status(201)
-        .json({ message: "Could not Upload file successfully" });
-    });
-  } catch (err) {
-    console.log("Errrrorrrrrrrrr");
-    // console.dir(err.errInfo.details, { depth: null });
-    next(err);
-  }
-};
+//     req.on("end", async () => {
+//       fileUploadCompleted = true;
+//       await updateDirectoriesSize(parentDirId, totalFileSize);
+//       return res.status(201).json({ message: "File Uploaded successfully" });
+//     });
+
+//     req.on("close", async () => {
+//       if (!fileUploadCompleted) {
+//         try {
+//           writeStream.close();
+//           await insertedFile.deleteOne();
+//           console.log("file cleaned that was cancled in uploading !!");
+//           await rm(filePath);
+//           return res
+//             .status(201)
+//             .json({ message: "Could not Upload file successfully" });
+//         } catch (err) {
+//           console.error("Error cleaning up aborted upload:", err);
+//         }
+//       }
+//     });
+
+//     req.on("error", async () => {
+//       await File.deleteOne({ _id: insertedFile.insertedId });
+//       return res
+//         .status(201)
+//         .json({ message: "Could not Upload file successfully" });
+//     });
+//   } catch (err) {
+//     console.log("Errrrorrrrrrrrr");
+//     // console.dir(err.errInfo.details, { depth: null });
+//     next(err);
+//   }
+// };
 
 export const renameFile = async (req, res, next) => {
   const sanitizedData = sanitizeObject(req.body);
@@ -199,14 +209,67 @@ export const deleteFile = async (req, res, next) => {
   }
 
   try {
-    const fullfilename = `${rootPath}/storage/${id}${file.extension}`;
     await file.deleteOne();
     await updateDirectoriesSize(file.parentDirId, -file.size);
-    await rm(fullfilename, { recursive: true });
-    // await File.deleteOne({ _id: file._id })
-
+    // await rm(fullfilename, { recursive: true });
     return res.status(200).json({ message: "File Deleted Successfully" });
   } catch (err) {
     next(err);
+  }
+};
+
+export const uploadInitiate = async (req, res) => {
+  // console.log(req.body);
+  const parentDirId = req.body.parentDirId || req.user.rootdirId;
+  const MAX_FILE_LIMIT = 100 * 1024 ** 2; //10MB
+  try {
+    const parentDirData = await Directory.findOne({
+      _id: parentDirId,
+      userId: req.user._id,
+    });
+
+    // Check if parent directory exists
+    if (!parentDirData) {
+      return res.status(404).json({ error: "Parent directory not found!" });
+    }
+
+    const filename = req.body.name || "untitled";
+    const fileSize = req.body.size;
+
+    const user = await User.findById(req.user._id).lean();
+    const rootDir = await Directory.findById(req.user.rootdirId).lean();
+
+    const remainingSpace = user.maxStorageInBytes - rootDir.size;
+
+    // For file limit
+    if (fileSize > MAX_FILE_LIMIT) {
+      return res.status(400).json({ error: "File size exceeds 100MB limit." });
+    }
+
+    if (fileSize > remainingSpace) {
+      return res.status(507).json({
+        error: `Not enough storage !!`,
+      });
+    }
+
+    const extension = path.extname(filename);
+
+    const insertedFile = await File.insertOne({
+      extension,
+      name: filename,
+      size: fileSize,
+      parentDirId: parentDirData._id,
+      userId: req.user._id,
+      isuploding: true,
+    });
+
+    const uploadSignedUrl = await createUploadSignedUrl({
+      key: `${insertedFile.id}${extension}`,
+      contentType: req.body.contentType,
+    });
+
+    res.json({ uploadSignedUrl, filId: insertedFile.id });
+  } catch (err) {
+    console.log(err);
   }
 };
