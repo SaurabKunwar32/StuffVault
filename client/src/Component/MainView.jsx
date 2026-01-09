@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { X, CheckCircle2, AlertTriangle } from "lucide-react";
 
 import Header from "./Header.jsx";
 import DirectoryModel from "../Models/DirectoryModel.jsx";
@@ -8,7 +9,12 @@ import RenameModal from "../Models/RenameModal.jsx";
 import DetailsPopup from "./DetailsPopup.jsx";
 import DeleteModal from "../Models/DeleteModel.jsx";
 
-import { deleteFile, renameFile, uploadInitiate } from "../apis/fileApi.js";
+import {
+  deleteFile,
+  renameFile,
+  uploadComplete,
+  uploadInitiate,
+} from "../apis/fileApi.js";
 import {
   getDirectoryItems,
   createDirectory,
@@ -30,6 +36,7 @@ export default function DirectoryView() {
 
   //  UI State
   const [errorMessage, setErrorMessage] = useState("");
+  const [showSuccessMessage, setShowSuccessMessage] = useState("");
   const [showCreateDirModal, setShowCreateDirModal] = useState(false);
   const [newDirname, setNewDirname] = useState("New Folder");
 
@@ -159,22 +166,30 @@ export default function DirectoryView() {
       isUploading: true,
     };
 
-    const data = await uploadInitiate({
-      name: file.name,
-      size: file.size,
-      contentType: file.type,
-      parentDirId: dirId,
-    });
+    try {
+      const data = await uploadInitiate({
+        name: file.name,
+        size: file.size,
+        contentType: file.type,
+        parentDirId: dirId,
+      });
 
-    const { filId, uploadSignedUrl } = data;
-    // console.log(data);
+      const { filId, uploadSignedUrl } = data;
+      // console.log(data);
 
-    // Optimistically show the file in the list
-    setFilesList((prev) => [tempItem, ...prev]);
-    setUploadItem(tempItem);
-    e.target.value = "";
+      // Optimistically show the file in the list
+      setFilesList((prev) => [tempItem, ...prev]);
+      setUploadItem(tempItem);
+      e.target.value = "";
 
-    startUpload({ item: tempItem, uploadUrl: uploadSignedUrl, filId });
+      startUpload({ item: tempItem, uploadUrl: uploadSignedUrl, filId });
+    } catch (err) {
+      if (err.status === 507 || 413) {
+        setErrorMessage(err.response.data.error);
+      }
+      setTimeout(() => setErrorMessage(""), 3000);
+      // console.log(err);
+    }
   }
 
   function startUpload({ item, uploadUrl, filId }) {
@@ -191,8 +206,17 @@ export default function DirectoryView() {
       }
     };
 
-    xhr.onload = () => {
+    xhr.onload = async () => {
       // Clear upload state and refresh directory
+      if (xhr.status === 200) {
+        const fileUploadResponse = await uploadComplete(filId);
+        setShowSuccessMessage(fileUploadResponse.message);
+        setTimeout(() => setShowSuccessMessage(""), 3000);
+        // console.log(fileUploadResponse.message);
+      } else {
+        setErrorMessage("File not uploded !!");
+        setTimeout(() => setErrorMessage(""), 3000);
+      }
       setUploadItem(null);
       loadDirectory();
     };
@@ -222,33 +246,36 @@ export default function DirectoryView() {
   }
 
   //  CRUD Operations
-  async function handleFetchErrors(response) {
-    // Axios doesn't have "ok", it throws errors for non-2xx responses automatically.
-    // But in case the backend returns a custom error in data:
-    if (!response || typeof response !== "object") {
-      throw new Error("Some Error occured !! ");
-    }
+  // async function handleFetchErrors(response) {
+  //   // Axios doesn't have "ok", it throws errors for non-2xx responses automatically.
+  //   // But in case the backend returns a custom error in data:
+  //   if (!response || typeof response !== "object") {
+  //     throw new Error("Some Error occured !! ");
+  //   }
 
-    if (response.error) {
-      throw new Error(response.error);
-    }
+  //   if (response.error) {
+  //     throw new Error(response.error);
+  //   }
 
-    // If you sometimes include status info manually in response
-    if (response.status && response.status >= 400) {
-      throw new Error(
-        response.message || `Request failed with status ${response.status}`
-      );
-    }
+  //   // If you sometimes include status info manually in response
+  //   if (response.status && response.status >= 400) {
+  //     throw new Error(
+  //       response.message || `Request failed with status ${response.status}`
+  //     );
+  //   }
 
-    return response;
-  }
+  //   return response;
+  // }
 
   // Delete a file /directory
   async function handleDeleteDirectory(id) {
     setErrorMessage("");
     try {
       const response = await deleteDirectory(id);
-      await handleFetchErrors(response);
+      setShowSuccessMessage(response.message);
+      setTimeout(() => setShowSuccessMessage(""), 3000);
+      // await handleFetchErrors(response);
+      // console.log(response);
       loadDirectory();
     } catch (err) {
       setErrorMessage(
@@ -261,7 +288,10 @@ export default function DirectoryView() {
     setErrorMessage("");
     try {
       const response = await deleteFile(id);
-      await handleFetchErrors(response);
+      // console.log(response);
+      setShowSuccessMessage(response.message);
+      setTimeout(() => setShowSuccessMessage(""), 3000);
+      // await handleFetchErrors(response);
       loadDirectory();
     } catch (err) {
       setErrorMessage(
@@ -274,7 +304,10 @@ export default function DirectoryView() {
     e.preventDefault();
     try {
       const response = await createDirectory(dirId, newDirname);
-      await handleFetchErrors(response);
+      setShowSuccessMessage(response.message);
+      setTimeout(() => setShowSuccessMessage(""), 3000);
+      // await handleFetchErrors(response);
+      // console.log(response);
       setNewDirname("New Folder");
       setShowCreateDirModal(false);
       loadDirectory();
@@ -399,21 +432,7 @@ export default function DirectoryView() {
           <div className="fixed top-6 right-6 z-50 animate-slide-in">
             <div className="flex items-center gap-3 px-5 py-4 bg-red-50 border-l-4 border-red-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
               {/* Error Icon */}
-              <div className="flex-shrink-0">
-                <svg
-                  className="w-6 h-6 text-red-600"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 9v2m0 4h.01M5.07 19h13.86c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.73 3z"
-                  />
-                </svg>
-              </div>
+              <AlertTriangle className="w-6 h-6 text-red-600" />
 
               {/* Message */}
               <div className="flex-1">
@@ -421,9 +440,43 @@ export default function DirectoryView() {
                   {errorMessage}
                 </p>
               </div>
+
+              {/* Close Button (Centered) */}
+              <button
+                onClick={() => setErrorMessage("")}
+                className="text-red-500 hover:text-red-700 transition ml-2"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
             </div>
           </div>
         )}
+
+      {showSuccessMessage && (
+        <div className="fixed top-6 right-6 z-50 animate-slide-in">
+          <div className="flex items-center gap-3 px-5 py-4 bg-green-50 border-l-4 border-green-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
+            {/* Success Icon */}
+            <CheckCircle2 className="w-6 h-6 text-green-600" />
+
+            {/* Message */}
+            <div className="flex-1">
+              <p className="text-sm text-green-800 font-medium leading-snug">
+                {showSuccessMessage}
+              </p>
+            </div>
+
+            {/* Close Button (Centered) */}
+            <button
+              onClick={() => setShowSuccessMessage("")}
+              className="text-green-600 hover:text-green-800 transition ml-2"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <Header
         directoryName={directoryName}

@@ -9,7 +9,7 @@ redisClient.on('error', (err) => {
 
 try {
     await redisClient.connect();
-    console.log(" Redis Connected !!");
+    console.log("Redis Connected !!");
 } catch (err) {
     console.error("Initial Redis connection failed:", err.message);
 }

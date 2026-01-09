@@ -6,10 +6,14 @@ import File from "../models/fileModel.js";
 import { renameFileSchema } from "../validators/authSchema.js";
 import z from "zod";
 import { sanitizeObject } from "../utils/sanitize.js";
-import { rootPath } from "../app.js";
 import updateDirectoriesSize from "../utils/updateDirectoriesSize.js";
 import User from "../models/userModel.js";
-import { createGetSignedUrl, createUploadSignedUrl } from "../config/s3.js";
+import {
+  createGetSignedUrl,
+  createUploadSignedUrl,
+  deleteS3File,
+  getS3FileMetaData,
+} from "../config/s3.js";
 
 export const getFiles = async (req, res) => {
   if (req.user.isDeleted) {
@@ -45,131 +49,7 @@ export const getFiles = async (req, res) => {
   });
 
   return res.redirect(fileUrl);
-
-  return res.sendFile(filePath, (err) => {
-    if (!res.headersSent) {
-      return res.status(404).json({ error: "File not found!" });
-    }
-  });
 };
-
-// export const uploadFile = async (req, res, next) => {
-//   const parentDirId = req.params.parentDirId || req.user.rootdirId;
-//   const MAX_FILE_LIMIT = 100 * 1024 ** 2; //10MB
-//   try {
-//     const parentDirData = await Directory.findOne({
-//       _id: parentDirId,
-//       userId: req.user._id,
-//     });
-
-//     // Check if parent directory exists
-//     if (!parentDirData) {
-//       return res.status(404).json({ error: "Parent directory not found!" });
-//     }
-
-//     const filename = req.headers.filename || "untitled";
-//     const fileSize = req.headers.filesize;
-
-//     const user = await User.findById(req.user._id).lean();
-//     const rootDir = await Directory.findById(req.user.rootdirId).lean();
-
-//     const remainingSpace = user.maxStorageInBytes - rootDir.size;
-
-//     // File size limit
-//     if (fileSize > MAX_FILE_LIMIT) {
-//       res.destroy();
-//       return res.status(400).json({ error: "File size exceeds 100MB limit." });
-//       // res.header("Connection", "close");
-//       // return res.end();
-//     }
-
-//     // STORAGE LIMIT CHECK
-
-//     if (fileSize > remainingSpace) {
-//       console.log("File too large");
-//       return res.destroy();
-//     }
-
-//     const extension = path.extname(filename);
-
-//     const insertedFile = await File.insertOne({
-//       extension,
-//       name: filename,
-//       size: fileSize,
-//       parentDirId: parentDirData._id,
-//       userId: req.user._id,
-//     });
-
-//     const fileId = insertedFile.id;
-
-//     const fullFileName = `${fileId}${extension}`;
-//     const filePath = `${rootPath}/storage/${fullFileName}`;
-
-//     const writeStream = createWriteStream(filePath);
-//     // req.pipe(writeStream);
-
-//     let totalFileSize = 0;
-//     let aborted = false;
-//     let fileUploadCompleted = false;
-
-//     req.on("data", async (chunk) => {
-//       if (aborted) return;
-//       totalFileSize += chunk.length;
-//       if (totalFileSize > fileSize) {
-//         // console.log("object");
-//         aborted = true;
-//         writeStream.close();
-//         await insertedFile.deleteOne();
-//         await rm(filePath);
-//         return req.destroy();
-//       }
-//       const canWrite = writeStream.write(chunk); //backpressure  occur
-//       if (!canWrite) {
-//         req.pause();
-//       }
-//     });
-
-//     // backpressure is handled here
-//     writeStream.on("drain", () => {
-//       if (!aborted) {
-//         req.resume(); // resume when buffer is free
-//       }
-//     });
-
-//     req.on("end", async () => {
-//       fileUploadCompleted = true;
-//       await updateDirectoriesSize(parentDirId, totalFileSize);
-//       return res.status(201).json({ message: "File Uploaded successfully" });
-//     });
-
-//     req.on("close", async () => {
-//       if (!fileUploadCompleted) {
-//         try {
-//           writeStream.close();
-//           await insertedFile.deleteOne();
-//           console.log("file cleaned that was cancled in uploading !!");
-//           await rm(filePath);
-//           return res
-//             .status(201)
-//             .json({ message: "Could not Upload file successfully" });
-//         } catch (err) {
-//           console.error("Error cleaning up aborted upload:", err);
-//         }
-//       }
-//     });
-
-//     req.on("error", async () => {
-//       await File.deleteOne({ _id: insertedFile.insertedId });
-//       return res
-//         .status(201)
-//         .json({ message: "Could not Upload file successfully" });
-//     });
-//   } catch (err) {
-//     console.log("Errrrorrrrrrrrr");
-//     // console.dir(err.errInfo.details, { depth: null });
-//     next(err);
-//   }
-// };
 
 export const renameFile = async (req, res, next) => {
   const sanitizedData = sanitizeObject(req.body);
@@ -211,13 +91,14 @@ export const deleteFile = async (req, res, next) => {
   try {
     await file.deleteOne();
     await updateDirectoriesSize(file.parentDirId, -file.size);
-    // await rm(fullfilename, { recursive: true });
+    await deleteS3File(`${file.id}${file.extension}`);
     return res.status(200).json({ message: "File Deleted Successfully" });
   } catch (err) {
     next(err);
   }
 };
 
+// Paths to upload directly on th s3 bucket
 export const uploadInitiate = async (req, res) => {
   // console.log(req.body);
   const parentDirId = req.body.parentDirId || req.user.rootdirId;
@@ -243,7 +124,9 @@ export const uploadInitiate = async (req, res) => {
 
     // For file limit
     if (fileSize > MAX_FILE_LIMIT) {
-      return res.status(400).json({ error: "File size exceeds 100MB limit." });
+      return res.status(413).json({
+        error: "File size exceeds the 100 MB limit.",
+      });
     }
 
     if (fileSize > remainingSpace) {
@@ -271,5 +154,32 @@ export const uploadInitiate = async (req, res) => {
     res.json({ uploadSignedUrl, filId: insertedFile.id });
   } catch (err) {
     console.log(err);
+  }
+};
+
+export const uploadComplete = async (req, res, next) => {
+  const { fileId } = req.body;
+  const file = await File.findById(fileId);
+  if (!file) {
+    return res
+      .status(404)
+      .json({ error: "File is not found in our records !!" });
+  }
+
+  try {
+    const fileData = await getS3FileMetaData(`${file.id}${file.extension}`);
+    if (fileData.ContentLength !== file.size) {
+      await file.deleteOne();
+      return res.status(400).json({ error: "File size does not match !!" });
+    }
+    file.isuploding = false;
+    await file.save();
+    await updateDirectoriesSize(file.parentDirId, file.size);
+    res.json({ message: "Upload completed !!" });
+  } catch (err) {
+    await file.deleteOne();
+    return res
+      .status(404)
+      .json({ error: "File could not be uploaded properly !!" });
   }
 };

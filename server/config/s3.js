@@ -1,9 +1,13 @@
 import {
+  DeleteObjectCommand,
+  DeleteObjectsCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { object } from "zod";
 
 const s3Client = new S3Client({
   profile: "nodejsUser",
@@ -44,4 +48,35 @@ export const createGetSignedUrl = async ({
   });
 
   return url;
+};
+
+export const getS3FileMetaData = async (key) => {
+  const command = new HeadObjectCommand({
+    Bucket: "stuff-vault",
+    Key: key,
+  });
+
+  return s3Client.send(command);
+};
+
+export const deleteS3File = async (key) => {
+  console.log({key});
+  const command = new DeleteObjectCommand({
+    Bucket: "stuff-vault",
+    Key: key,
+  });
+
+  return s3Client.send(command);
+};
+
+export const deleteS3Files = async (keys) => {
+  const command = new DeleteObjectsCommand({
+    Bucket: "stuff-vault",
+    Delete: {
+      Objects: keys,
+      Quite: false,
+    },
+  });
+
+  return s3Client.send(command);
 };
