@@ -7,7 +7,6 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { object } from "zod";
 
 const s3Client = new S3Client({
   profile: "nodejsUser",
@@ -60,7 +59,7 @@ export const getS3FileMetaData = async (key) => {
 };
 
 export const deleteS3File = async (key) => {
-  console.log({key});
+  // console.log({key});
   const command = new DeleteObjectCommand({
     Bucket: "stuff-vault",
     Key: key,

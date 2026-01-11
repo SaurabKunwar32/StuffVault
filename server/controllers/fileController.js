@@ -13,7 +13,7 @@ import {
   createUploadSignedUrl,
   deleteS3File,
   getS3FileMetaData,
-} from "../config/s3.js";
+} from "../services/s3.js";
 
 export const getFiles = async (req, res) => {
   if (req.user.isDeleted) {
@@ -177,9 +177,27 @@ export const uploadComplete = async (req, res, next) => {
     await updateDirectoriesSize(file.parentDirId, file.size);
     res.json({ message: "Upload completed !!" });
   } catch (err) {
+    console.log(err);
     await file.deleteOne();
     return res
       .status(404)
       .json({ error: "File could not be uploaded properly !!" });
   }
+};
+
+export const uploadCancel = async (req, res) => {
+  const { fileId } = req.body;
+
+  const file = await File.findOne({
+    _id: fileId,
+    isuploding: true,
+  });
+
+  if (!file) {
+    return res.status(404).json({ error: "Upload session not found" });
+  }
+
+  await file.deleteOne();
+
+  return res.json({ message: "Upload canceled !!" });
 };

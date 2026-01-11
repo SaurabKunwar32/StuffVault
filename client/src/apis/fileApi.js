@@ -21,3 +21,8 @@ export const uploadComplete = async (fileId) => {
   const { data } = await axiosWithCreds.post("/file/upload/complete", {fileId});
   return data;
 };
+
+export const uploadCancel = async (fileId) => {
+  const { data } = await axiosWithCreds.post("/file/upload/cancle", {fileId});
+  return data;
+};

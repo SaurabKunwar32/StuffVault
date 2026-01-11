@@ -9,7 +9,7 @@ import z from "zod";
 import { sanitizeInput } from "../utils/sanitize.js";
 import updateDirectoriesSize from "../utils/updateDirectoriesSize.js";
 import { buildLogicalPath, generateBreadCrumb } from "../utils/logicalPath.js";
-import { deleteS3Files } from "../config/s3.js";
+import { deleteS3Files } from "../services/s3.js";
 
 export const getDirectory = async (req, res, next) => {
   try {

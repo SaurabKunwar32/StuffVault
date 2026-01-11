@@ -12,6 +12,7 @@ import DeleteModal from "../Models/DeleteModel.jsx";
 import {
   deleteFile,
   renameFile,
+  uploadCancel,
   uploadComplete,
   uploadInitiate,
 } from "../apis/fileApi.js";
@@ -229,7 +230,15 @@ export default function DirectoryView() {
       setTimeout(() => setErrorMessage(""), 3000);
     };
 
-    xhr.onabort = () => {
+    xhr.onabort = async () => {
+      try {
+        const res = await uploadCancel(filId); // NEW
+        setErrorMessage(res.message);
+        setTimeout(() => setErrorMessage(""), 3000);
+      } catch (e) {
+        console.log(e);
+        // ignore — cleanup job will handle it
+      }
       setUploadItem(null);
     };
 
