@@ -6,6 +6,7 @@ import VerifyOtp from "./Forms/VerifyOtp.jsx";
 import UsersPage from "./Component/UsersPage.jsx";
 import Settings from "./Component/Settings.jsx";
 import UploadToast from "./Component/UploadToast.jsx";
+import SubscriptionPlans from "./Subscription/SubscriptionPlans.jsx";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
   {
     path: "/directory/:dirId",
     element: <MainView />,
+  },
+  {
+    path: "/subplans",
+    element: <SubscriptionPlans />,
   },
   // Catch-all route for invalid paths
   {

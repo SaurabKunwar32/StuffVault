@@ -8,6 +8,7 @@ import DirectoryList from "./DirectoryList.jsx";
 import RenameModal from "../Models/RenameModal.jsx";
 import DetailsPopup from "./DetailsPopup.jsx";
 import DeleteModal from "../Models/DeleteModel.jsx";
+import { DirectoryContext } from "../context/DirectoryContext.js";
 
 import {
   deleteFile,
@@ -22,6 +23,8 @@ import {
   deleteDirectory,
   renameDirectory,
 } from "../apis/directoryApi.js";
+import Sidebar from "./Sidebar.jsx";
+import { fetchUser } from "../apis/userApi.js";
 
 export default function DirectoryView() {
   const BASE_URL = "http://localhost:3000";
@@ -29,8 +32,11 @@ export default function DirectoryView() {
   const { dirId } = useParams();
   const navigate = useNavigate();
 
+  const [userData, setUserData] = useState("");
+  const [loading, setLoading] = useState(true);
+
   //  Directory & Data State
-  const [directoryName, setDirectoryName] = useState("StuffVault");
+  // const [directoryName, setDirectoryName] = useState("StuffVault");
   const [directoriesList, setDirectoriesList] = useState([]);
   const [filesList, setFilesList] = useState([]);
   const [breadCrumb, setBreadCrumb] = useState([]);
@@ -46,11 +52,6 @@ export default function DirectoryView() {
   const [renameId, setRenameId] = useState(null);
   const [renameValue, setRenameValue] = useState("");
   const [renameErrorsMessage, setrenameErrorsMessage] = useState(null); // "directory" or "file"
-
-  // const [uploadQueue, setUploadQueue] = useState([]); // queued items to upload
-  // const [uploadXhrMap, setUploadXhrMap] = useState({}); // track XHR per item
-  // const [progressMap, setProgressMap] = useState({}); // track progress per item
-  // const [isUploading, setIsUploading] = useState(false); // indicates if an upload is in progress
 
   // Context menu
   const [activeContextMenu, setActiveContextMenu] = useState(null);
@@ -79,14 +80,13 @@ export default function DirectoryView() {
     try {
       const data = await getDirectoryItems(dirId);
       setBreadCrumb(data.breadCrumb);
-      setDirectoryName(dirId ? data.name : "StuffVault");
       setDirectoriesList([...data.directories].reverse());
       setFilesList([...data.files].reverse());
     } catch (err) {
       if (err.response?.status === 401) navigate("/login");
       else
         setErrorMessage(
-          err.response.data || err.response?.data?.error || err.message
+          err.response.data || err.response?.data?.error || err.message,
         );
     }
   };
@@ -96,6 +96,25 @@ export default function DirectoryView() {
     // Reset context menu
     setActiveContextMenu(null);
   }, [dirId]);
+
+  // Fetch the user
+  useEffect(() => {
+    async function loadUserData() {
+      try {
+        const data = await fetchUser();
+        setUserData(data);
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUserData();
+  }, []);
+
+  // console.log(userData);
 
   //   Decide file icon
   function getFileIcon(filename) {
@@ -254,28 +273,6 @@ export default function DirectoryView() {
     setUploadItem(null);
   }
 
-  //  CRUD Operations
-  // async function handleFetchErrors(response) {
-  //   // Axios doesn't have "ok", it throws errors for non-2xx responses automatically.
-  //   // But in case the backend returns a custom error in data:
-  //   if (!response || typeof response !== "object") {
-  //     throw new Error("Some Error occured !! ");
-  //   }
-
-  //   if (response.error) {
-  //     throw new Error(response.error);
-  //   }
-
-  //   // If you sometimes include status info manually in response
-  //   if (response.status && response.status >= 400) {
-  //     throw new Error(
-  //       response.message || `Request failed with status ${response.status}`
-  //     );
-  //   }
-
-  //   return response;
-  // }
-
   // Delete a file /directory
   async function handleDeleteDirectory(id) {
     setErrorMessage("");
@@ -288,7 +285,7 @@ export default function DirectoryView() {
       loadDirectory();
     } catch (err) {
       setErrorMessage(
-        err.message || "Something went wrong while deleting the file."
+        err.message || "Something went wrong while deleting the file.",
       );
     }
   }
@@ -304,7 +301,7 @@ export default function DirectoryView() {
       loadDirectory();
     } catch (err) {
       setErrorMessage(
-        err.message || "Something went wrong while deleting the file."
+        err.message || "Something went wrong while deleting the file.",
       );
     }
   }
@@ -351,7 +348,7 @@ export default function DirectoryView() {
           setrenameErrorsMessage(
             renameValue.length < 1
               ? "Value cannot be empty !!"
-              : "Filename cannot start or end with a space !!"
+              : "Filename cannot start or end with a space !!",
           );
           return;
         }
@@ -362,7 +359,7 @@ export default function DirectoryView() {
           setrenameErrorsMessage(
             renameValue.length < 1
               ? "Directory name cannot be empty !!"
-              : "Directory name cannot start or end with a space !!"
+              : "Directory name cannot start or end with a space !!",
           );
           return;
         }
@@ -462,106 +459,137 @@ export default function DirectoryView() {
           </div>
         )}
 
-      {showSuccessMessage && (
-        <div className="fixed top-6 right-6 z-50 animate-slide-in">
-          <div className="flex items-center gap-3 px-5 py-4 bg-green-50 border-l-4 border-green-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
-            {/* Success Icon */}
-            <CheckCircle2 className="w-6 h-6 text-green-600" />
+      <div className="flex h-screen ">
+        <Sidebar userData={userData} />
 
-            {/* Message */}
-            <div className="flex-1">
-              <p className="text-sm text-green-800 font-medium leading-snug">
-                {showSuccessMessage}
-              </p>
+        <div className="flex-1 flex flex-col">
+          {showSuccessMessage && (
+            <div className="fixed top-6 right-6 z-50 animate-slide-in">
+              <div className="flex items-center gap-3 px-5 py-4 bg-green-50 border-l-4 border-green-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
+                {/* Success Icon */}
+                <CheckCircle2 className="w-6 h-6 text-green-600" />
+
+                {/* Message */}
+                <div className="flex-1">
+                  <p className="text-sm text-green-800 font-medium leading-snug">
+                    {showSuccessMessage}
+                  </p>
+                </div>
+
+                {/* Close Button (Centered) */}
+                <button
+                  onClick={() => setShowSuccessMessage("")}
+                  className="text-green-600 hover:text-green-800 transition ml-2"
+                  aria-label="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
+          )}
 
-            {/* Close Button (Centered) */}
-            <button
-              onClick={() => setShowSuccessMessage("")}
-              className="text-green-600 hover:text-green-800 transition ml-2"
-              aria-label="Close"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      )}
-
-      <Header
-        directoryName={directoryName}
-        onCreateFolderClick={() => setShowCreateDirModal(true)}
-        onUploadFilesClick={() => fileInputRef.current.click()}
-        fileInputRef={fileInputRef}
-        handleFileSelect={handleFileSelect}
-        SetShowInLines={SetShowInLines}
-        // Disable if the user doesn't have access
-        disabled={
-          errorMessage ===
-          "Directory not found or you do not have access to it!"
-        }
-      />
-
-      {showCreateDirModal && (
-        <DirectoryModel
-          newDirname={newDirname}
-          setNewDirname={setNewDirname}
-          onClose={() => setShowCreateDirModal(false)}
-          onCreateDirectory={handleCreateDirectory}
-        />
-      )}
-
-      {/* Rename Modal */}
-      {showRenameModal && (
-        <RenameModal
-          renameType={renameType}
-          renameValue={renameValue}
-          setRenameValue={setRenameValue}
-          onClose={() => setShowRenameModal(false)}
-          onRenameSubmit={handleRenameSubmit}
-          renameErrorsMessage={renameErrorsMessage}
-        />
-      )}
-
-      {showDeleteModal && deleteItem && (
-        <DeleteModal
-          deleteType={deleteItem.isDirectory ? "directory" : "file"}
-          deleteName={deleteItem.name}
-          onClose={() => setShowDeleteModal(false)}
-          onDelete={() => {
-            if (deleteItem.isDirectory) {
-              handleDeleteDirectory(deleteItem.id);
-            } else {
-              handleDeleteFile(deleteItem.id);
+          <Header
+            userData={userData}
+            onCreateFolderClick={() => setShowCreateDirModal(true)}
+            onUploadFilesClick={() => fileInputRef.current.click()}
+            fileInputRef={fileInputRef}
+            handleFileSelect={handleFileSelect}
+            SetShowInLines={SetShowInLines}
+            // Disable if the user doesn't have access
+            disabled={
+              errorMessage ===
+              "Directory not found or you do not have access to it!"
             }
-            setShowDeleteModal(false);
-          }}
-        />
-      )}
+          />
 
-      {detailsItem && (
-        <DetailsPopup item={detailsItem} onClose={closeDetailsPopup} />
-      )}
+          {showCreateDirModal && (
+            <DirectoryModel
+              newDirname={newDirname}
+              setNewDirname={setNewDirname}
+              onClose={() => setShowCreateDirModal(false)}
+              onCreateDirectory={handleCreateDirectory}
+            />
+          )}
 
-      <DirectoryList
-        items={CombinedItems}
-        handleRowClick={handleRowClick}
-        errorMessage={errorMessage}
-        activeContextMenu={activeContextMenu}
-        contextMenuPos={contextMenuPos}
-        handleContextMenu={handleContextMenu}
-        getFileIcon={getFileIcon}
-        showInLines={showInLines}
-        isUploading={isUploading}
-        progressMap={progressMap}
-        // uploadXhrMap={uploadXhrMap}
-        handleCancelUpload={handleCancelUpload}
-        setDeleteItem={setDeleteItem}
-        setShowDeleteModal={setShowDeleteModal}
-        openRenameModal={openRenameModal}
-        openDetailsPopup={openDetailsPopup}
-        breadCrumb={breadCrumb}
-        BASE_URL={BASE_URL}
-      />
+          {/* Rename Modal */}
+          {showRenameModal && (
+            <RenameModal
+              renameType={renameType}
+              renameValue={renameValue}
+              setRenameValue={setRenameValue}
+              onClose={() => setShowRenameModal(false)}
+              onRenameSubmit={handleRenameSubmit}
+              renameErrorsMessage={renameErrorsMessage}
+            />
+          )}
+
+          {showDeleteModal && deleteItem && (
+            <DeleteModal
+              deleteType={deleteItem.isDirectory ? "directory" : "file"}
+              deleteName={deleteItem.name}
+              onClose={() => setShowDeleteModal(false)}
+              onDelete={() => {
+                if (deleteItem.isDirectory) {
+                  handleDeleteDirectory(deleteItem.id);
+                } else {
+                  handleDeleteFile(deleteItem.id);
+                }
+                setShowDeleteModal(false);
+              }}
+            />
+          )}
+
+          {detailsItem && (
+            <DetailsPopup item={detailsItem} onClose={closeDetailsPopup} />
+          )}
+
+          {/* <DirectoryList
+            items={CombinedItems}
+            handleRowClick={handleRowClick}
+            errorMessage={errorMessage}
+            activeContextMenu={activeContextMenu}
+            contextMenuPos={contextMenuPos}
+            handleContextMenu={handleContextMenu}
+            getFileIcon={getFileIcon}
+            showInLines={showInLines}
+            isUploading={isUploading}
+            progressMap={progressMap}
+            // uploadXhrMap={uploadXhrMap}
+            handleCancelUpload={handleCancelUpload}
+            setDeleteItem={setDeleteItem}
+            setShowDeleteModal={setShowDeleteModal}
+            openRenameModal={openRenameModal}
+            openDetailsPopup={openDetailsPopup}
+            breadCrumb={breadCrumb}
+            BASE_URL={BASE_URL}
+          /> */}
+
+          <DirectoryContext.Provider
+            value={{
+              items: CombinedItems,
+              handleRowClick,
+              errorMessage,
+              activeContextMenu,
+              contextMenuPos,
+              handleContextMenu,
+              getFileIcon,
+              showInLines,
+              isUploading,
+              progressMap,
+              handleCancelUpload,
+              setDeleteItem,
+              setShowDeleteModal,
+              openRenameModal,
+              openDetailsPopup,
+              breadCrumb,
+              BASE_URL,
+            }}
+          >
+            <DirectoryList />
+          </DirectoryContext.Provider>
+          
+        </div>
+      </div>
     </>
   );
 }

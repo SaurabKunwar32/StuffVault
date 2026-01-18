@@ -1,26 +1,28 @@
 import { ChevronRight, Home } from "lucide-react";
 import DirectoryItem from "./DirectoryItem";
 import { Link } from "react-router-dom";
+import { useDirectoryContext } from "../context/DirectoryContext";
 
-export default function DirectoryList({
-  items,
-  handleRowClick,
-  activeContextMenu,
-  contextMenuPos,
-  handleContextMenu,
-  getFileIcon,
-  isUploading,
-  progressMap,
-  handleCancelUpload,
-  setDeleteItem,
-  setShowDeleteModal,
-  openRenameModal,
-  showInLines,
-  errorMessage,
-  openDetailsPopup,
-  breadCrumb,
-  BASE_URL,
-}) {
+export default function DirectoryList() {
+    const {
+    items,
+    handleRowClick,
+    errorMessage,
+    activeContextMenu,
+    contextMenuPos,
+    handleContextMenu,
+    getFileIcon,
+    showInLines,
+    isUploading,
+    progressMap,
+    handleCancelUpload,
+    setDeleteItem,
+    setShowDeleteModal,
+    openRenameModal,
+    openDetailsPopup,
+    breadCrumb,
+    BASE_URL,
+  } = useDirectoryContext();
   // const breadcrumb=[{saurab},{fjsf}]
   // console.log(breadCrumb);
   // console.log(items.length);
@@ -86,7 +88,7 @@ export default function DirectoryList({
           className={
             showInLines
               ? "flex flex-col gap-2.5 mt-5"
-              : "grid grid-cols-2 md:grid-cols-3  lg:grid-cols-4 gap-4  px-10 mt-5"
+              : "grid gap-4 px-10 mt-5 grid-cols-[repeat(auto-fill,minmax(160px,1fr))]"
           }
         >
           {items.map((item) => {
@@ -96,21 +98,6 @@ export default function DirectoryList({
               <DirectoryItem
                 key={item.id}
                 item={item}
-                showInLines={showInLines}
-                handleRowClick={handleRowClick}
-                activeContextMenu={activeContextMenu}
-                contextMenuPos={contextMenuPos}
-                handleContextMenu={handleContextMenu}
-                getFileIcon={getFileIcon}
-                isUploading={isUploading}
-                uploadProgress={uploadProgress}
-                handleCancelUpload={handleCancelUpload}
-                setDeleteItem={setDeleteItem}
-                setShowDeleteModal={setShowDeleteModal}
-                openRenameModal={openRenameModal}
-                openDetailsPopup={openDetailsPopup}
-                BASE_URL={BASE_URL}
-                progressMap={progressMap}
               />
             );
           })}

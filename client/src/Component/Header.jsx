@@ -7,23 +7,21 @@ import {
   LogIn,
   ChevronDown,
   Plus,
-  Search,
   Grid3X3,
   List,
   LayoutDashboard,
   Settings,
-  Archive,
 } from "lucide-react";
-import { fetchUser, logoutUser, logoutAllSessions } from "../apis/userApi.js";
+import { logoutUser, logoutAllSessions } from "../apis/userApi.js";
 
 export default function Header({
-  directoryName,
   onCreateFolderClick,
   onUploadFilesClick,
   fileInputRef,
   handleFileSelect,
   SetShowInLines,
   disabled = false,
+  userData,
 }) {
   // const BASE_URL = "http://localhost:3000";
 
@@ -33,12 +31,11 @@ export default function Header({
   const [userRole, setUserRole] = useState("User");
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
-  const [maxStorageInBytes, setMaxStorageInBytes] = useState(1073741824);
+  const [maxStorageInBytes, setMaxStorageInBytes] = useState(0);
   const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
 
-  // console.log(usedStorageInBytes);
   const usedGB = usedStorageInBytes / 1024 ** 3;
   const totalGB = (maxStorageInBytes / 1024 ** 3).toFixed(2);
 
@@ -47,45 +44,83 @@ export default function Header({
   const isOver80 = percentageUsed >= 80;
 
   useEffect(() => {
-    async function loadUser() {
-      try {
-        const user = await fetchUser();
-
-        if (user && user.name) {
-          setUserRole(user.role);
-          setLoggedIn(true);
-          setUserName(user.name);
-          setUserEmail(user.email);
-          setMaxStorageInBytes(user.maxStorageInBytes);
-          setUsedStorageInBytes(user.usedStorageInBytes);
-          // setUserPicture(data.picture || "");
-        } else {
-          // No valid user data, redirect to login
-          setLoggedIn(false);
-          setUserName("Guest User");
-          setUserEmail("guest@example.com");
-          setUserPicture("");
-          navigate("/login");
-        }
-      } catch (error) {
-        if (error.response?.status === 401) {
-          // Session expired or deleted → redirect to login
-          setLoggedIn(false);
-          setUserName("Guest User");
-          setUserEmail("guest@example.com");
-          setUserPicture("");
-          navigate("/login");
-          // window.location.href = "http://localhost:5173/login";
-        } else {
-          console.error("Error fetching user info:", error);
-        }
+    if (!userData) return;
+    try {
+      // const user = userData;
+      if (userData && userData.name) {
+        setUserRole(userData.role);
+        setLoggedIn(true);
+        setUserName(userData.name);
+        setUserEmail(userData.email);
+        setMaxStorageInBytes(userData.maxStorageInBytes);
+        setUsedStorageInBytes(userData.usedStorageInBytes);
+        // setUserPicture(data.picture || "");
+      } else {
+        // No valid user data, redirect to login
+        setLoggedIn(false);
+        setUserName("Guest User");
+        setUserEmail("guest@example.com");
+        setUserPicture("");
+        navigate("/login");
+      }
+    } catch (error) {
+      if (error.response?.status === 401) {
+        // Session expired or deleted → redirect to login
+        setLoggedIn(false);
+        setUserName("Guest User");
+        setUserEmail("guest@example.com");
+        setUserPicture("");
+        navigate("/login");
+        // window.location.href = "http://localhost:5173/login";
+      } else {
+        console.error("Error fetching user info:", error);
       }
     }
+  }, [userData]);
 
-    loadUser();
-  }, []);
+  // useEffect(() => {
+  //   if (!userData) return;
+  //   async function loadUser() {
+  //     try {
+  //       const user = userData;
+  //       // const user = await fetchUser();
+
+  //       if (user && user.name) {
+  //         setUserRole(user.role);
+  //         setLoggedIn(true);
+  //         setUserName(user.name);
+  //         setUserEmail(user.email);
+  //         setMaxStorageInBytes(user.maxStorageInBytes);
+  //         setUsedStorageInBytes(user.usedStorageInBytes);
+  //         // setUserPicture(data.picture || "");
+  //       } else {
+  //         // No valid user data, redirect to login
+  //         setLoggedIn(false);
+  //         setUserName("Guest User");
+  //         setUserEmail("guest@example.com");
+  //         setUserPicture("");
+  //         navigate("/login");
+  //       }
+  //     } catch (error) {
+  //       if (error.response?.status === 401) {
+  //         // Session expired or deleted → redirect to login
+  //         setLoggedIn(false);
+  //         setUserName("Guest User");
+  //         setUserEmail("guest@example.com");
+  //         setUserPicture("");
+  //         navigate("/login");
+  //         // window.location.href = "http://localhost:5173/login";
+  //       } else {
+  //         console.error("Error fetching user info:", error);
+  //       }
+  //     }
+  //   }
+
+  //   loadUser();
+  // }, [userData]);
 
   // Toggle dropdown
+
   const handleUserIconClick = () => {
     setShowUserMenu((prev) => !prev);
   };
@@ -137,13 +172,13 @@ export default function Header({
     <>
       {/* HEADER BAR */}
       <header className="bg-white border-b border-gray-200 px-6 py-3">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900  flex items-center gap-1">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-gray-900 to-gray-700 text-white shadow-lg">
-              <Archive className="h-5 w-5" />
+        <div className="flex items-center justify-end">
+          {/* <h1 className="text-2xl font-bold text-gray-900  flex items-center gap-1">
+            <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-blue-500">
+              <Cloud size={28} strokeWidth={1.2} className="text-white" />
             </div>
             {directoryName}
-          </h1>
+          </h1> */}
 
           {/* USER SECTION */}
           <div className="relative" ref={userMenuRef}>
@@ -185,31 +220,6 @@ export default function Header({
               <div className="absolute top-full right-0 w-64 mt-2 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
                 {loggedIn ? (
                   <>
-                    <div className="px-4 pt-3 pb-2">
-                      <div className="flex flex-col gap-1 text-xs text-gray-700">
-                        {/* Progress bar container */}
-                        <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full rounded-full transition-all duration-300 ${
-                              isOver80 ? "bg-red-500" : "bg-blue-500"
-                            }`}
-                            style={{
-                              width: `${Math.min(
-                                (usedGB / totalGB) * 100,
-                                100
-                              )}%`,
-                            }}
-                          />
-                        </div>
-
-                        {/* Usage text */}
-                        <div className="flex justify-between text-[11px] text-gray-600">
-                          <span>{usedGB.toFixed(2)} GB used</span>
-                          <span>{totalGB} GB total</span>
-                        </div>
-                      </div>
-                    </div>
-
                     <div className="py-2">
                       <button
                         className="flex items-center space-x-3 w-full px-4 py-3 text-left text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200"
@@ -314,19 +324,6 @@ export default function Header({
 
           {/* Search & View Switcher */}
           <div className="flex items-center space-x-4">
-            <div className="relative">
-              <Search
-                size={16}
-                className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="text"
-                placeholder="Search files..."
-                className="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                disabled
-              />
-            </div>
-
             <div className="flex items-center bg-gray-100 rounded-lg p-1">
               {/* <div > */}
               <button
