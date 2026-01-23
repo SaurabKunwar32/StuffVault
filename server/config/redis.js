@@ -1,7 +1,7 @@
 import { createClient } from 'redis'
 
 const redisClient = createClient({
-    password:"My$trong123Pass"
+    password:process.env.REDIS_PASS
 })
 
 redisClient.on('error', (err) => {
