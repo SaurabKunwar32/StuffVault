@@ -1,5 +1,5 @@
 import { Folder, MoreVertical } from "lucide-react";
-import { formatSIze } from "../DetailsPopup";
+import { formatSIze } from "../../Models/DetailsPopupModel";
 
 const GridView = ({
   item,

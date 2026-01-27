@@ -5,8 +5,9 @@ import { Github, Cloud, Lock } from "lucide-react";
 import { loginWithGithub } from "../apis/loginWithGithub.js";
 import { loginWithGoogle } from "../apis/loginWithGoogle.js";
 import { loginUser } from "../apis/userApi.js";
+import { fetchUser } from "../apis/userApi.js";
 
-export default function Login() {
+export default function Login({ setUserData }) {
   const [formData, setFormData] = useState({
     email: "keme88@gmail.com",
     password: "abcd",
@@ -25,12 +26,21 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const data = await loginUser(formData);
-      if (data.error) setServerError(data.error);
-      else navigate("/");
+
+      if (data.error) {
+        setServerError(data.error);
+        return;
+      }
+
+      // 🔑 SYNC COOKIE SESSION → REACT STATE
+      const user = await fetchUser();
+      setUserData(user);
+
+      navigate("/app", { replace: true });
     } catch (error) {
-      console.error("Error:", error);
       setServerError(
         error.response?.data?.error ||
           "Something went wrong. Please try again.",
@@ -194,7 +204,10 @@ export default function Login() {
                   setServerError(data.error);
                   return;
                 }
-                navigate("/");
+                const user = await fetchUser();
+                setUserData(user);
+
+                navigate("/app", { replace: true });
               } catch (err) {
                 // console.error("Login error:", err);
                 setServerError(err.response.data.error);

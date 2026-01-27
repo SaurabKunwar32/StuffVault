@@ -22,6 +22,7 @@ export default function Header({
   SetShowInLines,
   disabled = false,
   userData,
+  setUserData,
 }) {
   // const BASE_URL = "http://localhost:3000";
 
@@ -31,93 +32,30 @@ export default function Header({
   const [userRole, setUserRole] = useState("User");
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
-  const [maxStorageInBytes, setMaxStorageInBytes] = useState(0);
-  const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
+  // const [maxStorageInBytes, setMaxStorageInBytes] = useState(0);
+  // const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
 
-  const usedGB = usedStorageInBytes / 1024 ** 3;
-  const totalGB = (maxStorageInBytes / 1024 ** 3).toFixed(2);
+  // const usedGB = usedStorageInBytes / 1024 ** 3;
+  // const totalGB = (maxStorageInBytes / 1024 ** 3).toFixed(2);
 
-  const percentageUsed = totalGB > 0 ? (usedGB / totalGB) * 100 : 0;
-
-  const isOver80 = percentageUsed >= 80;
+  // const percentageUsed = totalGB > 0 ? (usedGB / totalGB) * 100 : 0;
 
   useEffect(() => {
-    if (!userData) return;
-    try {
-      // const user = userData;
-      if (userData && userData.name) {
-        setUserRole(userData.role);
-        setLoggedIn(true);
-        setUserName(userData.name);
-        setUserEmail(userData.email);
-        setMaxStorageInBytes(userData.maxStorageInBytes);
-        setUsedStorageInBytes(userData.usedStorageInBytes);
-        // setUserPicture(data.picture || "");
-      } else {
-        // No valid user data, redirect to login
-        setLoggedIn(false);
-        setUserName("Guest User");
-        setUserEmail("guest@example.com");
-        setUserPicture("");
-        navigate("/login");
-      }
-    } catch (error) {
-      if (error.response?.status === 401) {
-        // Session expired or deleted → redirect to login
-        setLoggedIn(false);
-        setUserName("Guest User");
-        setUserEmail("guest@example.com");
-        setUserPicture("");
-        navigate("/login");
-        // window.location.href = "http://localhost:5173/login";
-      } else {
-        console.error("Error fetching user info:", error);
-      }
+    if (!userData) {
+      setLoggedIn(false);
+      setUserName("Guest User");
+      setUserEmail("guest@example.com");
+      setUserPicture("");
+      return;
     }
+
+    setLoggedIn(true);
+    setUserRole(userData.role);
+    setUserName(userData.name);
+    setUserEmail(userData.email);
   }, [userData]);
-
-  // useEffect(() => {
-  //   if (!userData) return;
-  //   async function loadUser() {
-  //     try {
-  //       const user = userData;
-  //       // const user = await fetchUser();
-
-  //       if (user && user.name) {
-  //         setUserRole(user.role);
-  //         setLoggedIn(true);
-  //         setUserName(user.name);
-  //         setUserEmail(user.email);
-  //         setMaxStorageInBytes(user.maxStorageInBytes);
-  //         setUsedStorageInBytes(user.usedStorageInBytes);
-  //         // setUserPicture(data.picture || "");
-  //       } else {
-  //         // No valid user data, redirect to login
-  //         setLoggedIn(false);
-  //         setUserName("Guest User");
-  //         setUserEmail("guest@example.com");
-  //         setUserPicture("");
-  //         navigate("/login");
-  //       }
-  //     } catch (error) {
-  //       if (error.response?.status === 401) {
-  //         // Session expired or deleted → redirect to login
-  //         setLoggedIn(false);
-  //         setUserName("Guest User");
-  //         setUserEmail("guest@example.com");
-  //         setUserPicture("");
-  //         navigate("/login");
-  //         // window.location.href = "http://localhost:5173/login";
-  //       } else {
-  //         console.error("Error fetching user info:", error);
-  //       }
-  //     }
-  //   }
-
-  //   loadUser();
-  // }, [userData]);
 
   // Toggle dropdown
 
@@ -129,10 +67,8 @@ export default function Header({
   const handleLogout = async () => {
     try {
       await logoutUser();
-      setLoggedIn(false);
-      setUserName("Guest User");
-      setUserEmail("guest@example.com");
-      navigate("/login");
+      console.log("logged outt user");
+      setUserData(null);
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
@@ -144,10 +80,7 @@ export default function Header({
   const handleLogoutAll = async () => {
     try {
       await logoutAllSessions();
-      setLoggedIn(false);
-      setUserName("Guest User");
-      setUserEmail("guest@example.com");
-      navigate("/login");
+      setUserData(null);
     } catch (err) {
       console.error("Logout all error:", err);
     } finally {
@@ -173,13 +106,6 @@ export default function Header({
       {/* HEADER BAR */}
       <header className="bg-white border-b border-gray-200 px-6 py-3">
         <div className="flex items-center justify-end">
-          {/* <h1 className="text-2xl font-bold text-gray-900  flex items-center gap-1">
-            <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-blue-500">
-              <Cloud size={28} strokeWidth={1.2} className="text-white" />
-            </div>
-            {directoryName}
-          </h1> */}
-
           {/* USER SECTION */}
           <div className="relative" ref={userMenuRef}>
             <div

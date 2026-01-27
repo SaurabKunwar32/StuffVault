@@ -6,7 +6,7 @@ import Header from "./Header.jsx";
 import DirectoryModel from "../Models/DirectoryModel.jsx";
 import DirectoryList from "./DirectoryList.jsx";
 import RenameModal from "../Models/RenameModal.jsx";
-import DetailsPopup from "./DetailsPopup.jsx";
+import DetailsPopup from "../Models/DetailsPopupModel.jsx";
 import DeleteModal from "../Models/DeleteModel.jsx";
 import { DirectoryContext } from "../context/DirectoryContext.js";
 
@@ -24,16 +24,13 @@ import {
   renameDirectory,
 } from "../apis/directoryApi.js";
 import Sidebar from "./Sidebar.jsx";
-import { fetchUser } from "../apis/userApi.js";
+// import { fetchUser } from "../apis/userApi.js";
 
-export default function DirectoryView() {
+export default function DirectoryView({ userData, loading, setUserData }) {
   const BASE_URL = "http://localhost:3000";
 
   const { dirId } = useParams();
   const navigate = useNavigate();
-
-  const [userData, setUserData] = useState("");
-  const [loading, setLoading] = useState(true);
 
   //  Directory & Data State
   // const [directoryName, setDirectoryName] = useState("StuffVault");
@@ -79,42 +76,26 @@ export default function DirectoryView() {
   const loadDirectory = async () => {
     try {
       const data = await getDirectoryItems(dirId);
+
+      if (!data) return; // 401 silently ignored
+
       setBreadCrumb(data.breadCrumb);
       setDirectoriesList([...data.directories].reverse());
       setFilesList([...data.files].reverse());
     } catch (err) {
-      if (err.response?.status === 401) navigate("/login");
-      else
-        setErrorMessage(
-          err.response.data || err.response?.data?.error || err.message,
-        );
+      setErrorMessage(
+        err.response?.data?.error || err.response?.data || err.message,
+      );
     }
   };
 
   useEffect(() => {
+    if (loading) return; // wait for auth check
+    if (!userData) return; // stop after logout
+
     loadDirectory();
-    // Reset context menu
     setActiveContextMenu(null);
-  }, [dirId]);
-
-  // Fetch the user
-  useEffect(() => {
-    async function loadUserData() {
-      try {
-        const data = await fetchUser();
-        setUserData(data);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-        navigate("/login");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadUserData();
-  }, []);
-
-  // console.log(userData);
+  }, [dirId, userData, loading]);
 
   //   Decide file icon
   function getFileIcon(filename) {
@@ -442,8 +423,10 @@ export default function DirectoryView() {
 
               {/* Message */}
               <div className="flex-1">
-                <p className="text-sm text-red-800 font-medium leading-snug">
-                  {errorMessage}
+                <p>
+                  {typeof errorMessage === "string"
+                    ? errorMessage
+                    : errorMessage?.message || "Something went wrong"}
                 </p>
               </div>
 
@@ -490,6 +473,7 @@ export default function DirectoryView() {
 
           <Header
             userData={userData}
+            setUserData={setUserData}
             onCreateFolderClick={() => setShowCreateDirModal(true)}
             onUploadFilesClick={() => fileInputRef.current.click()}
             fileInputRef={fileInputRef}
@@ -543,27 +527,6 @@ export default function DirectoryView() {
             <DetailsPopup item={detailsItem} onClose={closeDetailsPopup} />
           )}
 
-          {/* <DirectoryList
-            items={CombinedItems}
-            handleRowClick={handleRowClick}
-            errorMessage={errorMessage}
-            activeContextMenu={activeContextMenu}
-            contextMenuPos={contextMenuPos}
-            handleContextMenu={handleContextMenu}
-            getFileIcon={getFileIcon}
-            showInLines={showInLines}
-            isUploading={isUploading}
-            progressMap={progressMap}
-            // uploadXhrMap={uploadXhrMap}
-            handleCancelUpload={handleCancelUpload}
-            setDeleteItem={setDeleteItem}
-            setShowDeleteModal={setShowDeleteModal}
-            openRenameModal={openRenameModal}
-            openDetailsPopup={openDetailsPopup}
-            breadCrumb={breadCrumb}
-            BASE_URL={BASE_URL}
-          /> */}
-
           <DirectoryContext.Provider
             value={{
               items: CombinedItems,
@@ -587,7 +550,6 @@ export default function DirectoryView() {
           >
             <DirectoryList />
           </DirectoryContext.Provider>
-          
         </div>
       </div>
     </>

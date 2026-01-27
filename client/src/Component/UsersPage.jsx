@@ -18,11 +18,10 @@ import {
   logoutUserById,
   deleteUserPermanentlyById,
   updateUserRole as apiUpdateUserRole,
-  restoreUserById
+  restoreUserById,
 } from "../apis/userApi.js";
 
-export default function UsersPage() {
-  const BASE_URL = "http://localhost:3000";
+export default function UsersPage({ setUserData }) {
   const navigate = useNavigate();
 
   const [users, setUsers] = useState([]);
@@ -39,29 +38,27 @@ export default function UsersPage() {
     type: "",
     user: null,
   });
-
+  const [pageLoading, setPageLoading] = useState(true);
   const [isRateLimited, setIsRateLimited] = useState(false);
   const [rateLimitMessage, setRateLimitMessage] = useState("");
 
-
   // console.log(confirmModal.isOpen, confirmModal.type, confirmModal.user);
-
 
   const handleRateLimit = (error) => {
     if (error.status === 429) {
       setIsRateLimited(true);
       setRateLimitMessage(
         error.response?.data?.message ||
-        "Too many requests. Please try again later."
+          "Too many requests. Please try again later.",
       );
       return true;
     }
     return false;
   };
 
-
   async function refreshUsers() {
     try {
+      setPageLoading(true);
       const usersData = await fetchAllUsers();
       setUsers(usersData.transformedUsers);
       setDeletedUsers(usersData.deletedUsers);
@@ -76,66 +73,43 @@ export default function UsersPage() {
       if (error.status === 401) {
         navigate("/login");
       }
-      // console.error("Error refreshing users:", error);
+    } finally {
+      setPageLoading(false);
     }
   }
 
-
   useEffect(() => {
-    refreshUsers()
+    refreshUsers();
   }, []);
-
-  // async function fetchUsers() {
-  //   try {
-  //     const data = await fetchAllUsers(); // already JSON
-
-  //     setUsers(data.transformedUsers);
-  //     setDeletedUsers(data.deletedUsers);
-  //   } catch (error) {
-  //     console.error("Error fetching users:", error);
-
-  //     // If your helper throws on HTTP errors, handle them here
-  //     if (error.status === 403) navigate("/");
-  //     else if (error.status === 401) navigate("/login");
-  //   }
-  // }
-
-
-  // async function fetchCurrentUser() {
-  //   try {
-  //     const data = await fetchUser(); // already JSON
-  //     setUserName(data.name);
-  //     setUserEmail(data.email);
-  //     setUserRole(data.role);
-  //   } catch (error) {
-  //     // Custom helpers often throw normal Error objects, not Axios-style
-  //     if (error.status === 401) navigate("/login");
-  //     else console.error("Fetching user failed:", error);
-  //   }
-  // }
-
 
   const logoutUser = async (user) => {
     try {
-      const { data } = await logoutUserById(user.id)
+      await logoutUserById(user.id);
+
+      if (user.email === userEmail) {
+        setUserData(null);
+        navigate("/", { replace: true });
+        return;
+      }
 
       setNotificationPopup({
         message: `${user.name} logged out successfully!`,
         type: "logout",
       });
+
       // console.log(data);
 
-      refreshUsers()
+      refreshUsers();
     } catch (error) {
       console.error("Logout error:", error);
 
       setNotificationPopup({
-        message: error.response?.data?.error || `Error logging out ${user.name}`,
+        message:
+          error.response?.data?.error || `Error logging out ${user.name}`,
         type: "error",
       });
     }
   };
-
 
   const deleteUser = async (user) => {
     try {
@@ -163,7 +137,6 @@ export default function UsersPage() {
     }
   };
 
-
   const deleteUserPermanently = async (user) => {
     try {
       await deleteUserPermanentlyById(user.id);
@@ -179,7 +152,6 @@ export default function UsersPage() {
       //   prevUsers.filter((u) => u.id !== user.id)
       // );
       await refreshUsers();
-
     } catch (err) {
       console.error("Permanent delete error:", err);
 
@@ -192,7 +164,6 @@ export default function UsersPage() {
       });
     }
   };
-
 
   const restoreUser = async (user) => {
     try {
@@ -218,7 +189,7 @@ export default function UsersPage() {
     if (notificationPopup.message) {
       const timer = setTimeout(
         () => setNotificationPopup({ message: "", type: "" }),
-        3000
+        3000,
       );
       return () => clearTimeout(timer);
     }
@@ -252,16 +223,32 @@ export default function UsersPage() {
     }
   };
 
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200">
+        <div className="flex flex-col items-center gap-6">
+          {/* Spinner */}
+          <div className="w-14 h-14 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+
+          {/* Text */}
+          <div className="text-center">
+            <h2 className="text-lg font-semibold text-gray-800">
+              Loading user data
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Please wait while we prepare the dashboard
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isRateLimited) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-center px-4">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Slow down ⏳
-        </h1>
-        <p className="text-gray-600 max-w-md">
-          {rateLimitMessage}
-        </p>
+        <h1 className="text-3xl font-bold text-gray-800 mb-4">Slow down ⏳</h1>
+        <p className="text-gray-600 max-w-md">{rateLimitMessage}</p>
 
         <p className="text-sm text-gray-400 mt-6">
           This page will be available again shortly.
@@ -271,7 +258,6 @@ export default function UsersPage() {
   }
 
   return (
-
     <div className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200">
       {/* Top Bar */}
       <header className="w-full bg-white shadow-sm py-4 px-6 flex justify-between items-center">
@@ -290,10 +276,11 @@ export default function UsersPage() {
             </div>
           </div>
           <span
-            className={`px-3 py-1 rounded-full text-sm font-semibold ${userRole === "Admin"
-              ? "bg-red-100 text-red-700"
-              : "bg-blue-100 text-blue-700"
-              }`}
+            className={`px-3 py-1 rounded-full text-sm font-semibold ${
+              userRole === "Admin"
+                ? "bg-red-100 text-red-700"
+                : "bg-blue-100 text-blue-700"
+            }`}
           >
             {userRole}
           </span>
@@ -414,8 +401,9 @@ export default function UsersPage() {
                 {users.map((user, idx) => (
                   <tr
                     key={user.id}
-                    className={`transition duration-200 hover:bg-gray-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"
-                      }`}
+                    className={`transition duration-200 hover:bg-gray-50 ${
+                      idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    }`}
                   >
                     <td className="py-4 px-5 font-medium text-gray-900">
                       {user.name}
@@ -423,10 +411,11 @@ export default function UsersPage() {
                     <td className="py-4 px-5 text-gray-700">{user.email}</td>
                     <td className="py-4 px-5 text-center">
                       <span
-                        className={`px-3 py-1 rounded-full text-sm font-semibold ${user.isLoggedIn
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-200 text-gray-600"
-                          }`}
+                        className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                          user.isLoggedIn
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-200 text-gray-600"
+                        }`}
                       >
                         {user.isLoggedIn ? "Online" : "Offline"}
                       </span>
@@ -436,12 +425,19 @@ export default function UsersPage() {
                       {userRole === "Admin" || userRole === "Owner" ? (
                         <select
                           value={user.role}
-                          onChange={(e) => updateUserRole(user.id, e.target.value)}
+                          onChange={(e) =>
+                            updateUserRole(user.id, e.target.value)
+                          }
                           className={`px-3 py-1 rounded-full text-sm font-semibold 
-        ${user.role === "Admin" ? "bg-red-100 text-red-700" :
-                              user.role === "Owner" ? "bg-blue-100 text-blue-700" :
-                                user.role === "Manager" ? "bg-yellow-100 text-yellow-700" :
-                                  "bg-green-100 text-green-700"}
+        ${
+          user.role === "Admin"
+            ? "bg-red-100 text-red-700"
+            : user.role === "Owner"
+              ? "bg-blue-100 text-blue-700"
+              : user.role === "Manager"
+                ? "bg-yellow-100 text-yellow-700"
+                : "bg-green-100 text-green-700"
+        }
         cursor-pointer hover:opacity-90 transition duration-200`}
                         >
                           <option value="Admin">Admin</option>
@@ -452,10 +448,15 @@ export default function UsersPage() {
                       ) : (
                         <span
                           className={`px-3 py-1 rounded-full text-sm font-semibold 
-        ${user.role === "Admin" ? "bg-red-100 text-red-700" :
-                              user.role === "Owner" ? "bg-blue-100 text-blue-700" :
-                                user.role === "Manager" ? "bg-yellow-100 text-yellow-700" :
-                                  "bg-green-100 text-green-700"}`}
+        ${
+          user.role === "Admin"
+            ? "bg-red-100 text-red-700"
+            : user.role === "Owner"
+              ? "bg-blue-100 text-blue-700"
+              : user.role === "Manager"
+                ? "bg-yellow-100 text-yellow-700"
+                : "bg-green-100 text-green-700"
+        }`}
                         >
                           {user.role}
                         </span>
@@ -482,18 +483,22 @@ export default function UsersPage() {
                       <div className="flex justify-center items-center">
                         <button
                           onClick={() =>
-                            setConfirmModal({ isOpen: true, type: "logout", user })
+                            setConfirmModal({
+                              isOpen: true,
+                              type: "logout",
+                              user,
+                            })
                           }
                           disabled={!user.isLoggedIn}
-                          className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg text-sm font-medium transition ${user.isLoggedIn
-                            ? "bg-yellow-500 text-white hover:bg-yellow-600 shadow"
-                            : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                            }`}
+                          className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg text-sm font-medium transition ${
+                            user.isLoggedIn
+                              ? "bg-yellow-500 text-white hover:bg-yellow-600 shadow"
+                              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                          }`}
                         >
                           <LogOut className="w-4 h-4" />
                           Logout
                         </button>
-
                       </div>
                     </td>
 
@@ -502,18 +507,22 @@ export default function UsersPage() {
                         <div className="flex justify-center items-center">
                           <button
                             onClick={() =>
-                              setConfirmModal({ isOpen: true, type: "delete", user })
+                              setConfirmModal({
+                                isOpen: true,
+                                type: "delete",
+                                user,
+                              })
                             }
                             disabled={userEmail === user.email}
-                            className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg text-sm font-medium transition shadow ${userEmail === user.email
-                              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                              : "bg-red-500 text-white hover:bg-red-600"
-                              }`}
+                            className={`flex items-center gap-2 justify-center px-4 py-2 rounded-lg text-sm font-medium transition shadow ${
+                              userEmail === user.email
+                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                : "bg-red-500 text-white hover:bg-red-600"
+                            }`}
                           >
                             <Trash2 className="w-4 h-4" />
                             Delete
                           </button>
-
                         </div>
                       </td>
                     )}
@@ -545,8 +554,9 @@ export default function UsersPage() {
                     {deletedUsers.map((user, idx) => (
                       <tr
                         key={user._id}
-                        className={`transition duration-200 hover:bg-gray-50 ${idx % 2 === 0 ? "bg-white" : "bg-gray-50"
-                          }`}
+                        className={`transition duration-200 hover:bg-gray-50 ${
+                          idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                        }`}
                       >
                         <td className="py-4 px-5 font-medium text-gray-900">
                           {user.name}
@@ -585,7 +595,9 @@ export default function UsersPage() {
             isOpen={confirmModal.isOpen}
             type={confirmModal.type}
             user={confirmModal.user}
-            onClose={() => setConfirmModal({ isOpen: false, type: "", user: null })}
+            onClose={() =>
+              setConfirmModal({ isOpen: false, type: "", user: null })
+            }
             onConfirm={() => {
               if (confirmModal.type === "logout") {
                 logoutUser(confirmModal.user);
@@ -597,12 +609,10 @@ export default function UsersPage() {
               setConfirmModal({ isOpen: false, type: "", user: null });
             }}
             onPermanentDelete={() => {
-              deleteUserPermanently(confirmModal.user)
+              deleteUserPermanently(confirmModal.user);
               setConfirmModal({ isOpen: false, type: "", user: null });
             }}
           />
-
-
         </div>
       </main>
     </div>
