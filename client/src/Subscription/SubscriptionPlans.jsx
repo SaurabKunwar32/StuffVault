@@ -115,66 +115,74 @@ export default function SubscriptionPlans({ setUserData, userData }) {
   const [mode, setMode] = useState("monthly");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white max-w-[1540px] mx-auto">
-      {/* GLOBAL HEADER */}
-      {userData ? <Header userData={userData} setUserData={setUserData} /> : ""}
-      {/* PAGE CONTAINER */}
-      <main className="mx-auto max-w-7xl px-4 py-14">
-        {/* PAGE HEADER */}
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-4xl font-semibold tracking-tight text-slate-900">
-            Simple, transparent pricing
-          </h1>
-          <p className="mt-3 text-base text-slate-600">
-            Choose a plan that fits your storage needs. Upgrade or downgrade
-            anytime.
-          </p>
-        </div>
+    <>
+      <section id="plans" className="scroll-mt-24">
+        <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white max-w-[1540px] mx-auto">
+          {/* GLOBAL HEADER */}
+          {userData ? (
+            <Header userData={userData} setUserData={setUserData} />
+          ) : (
+            ""
+          )}
+          {/* PAGE CONTAINER */}
+          <main className="mx-auto max-w-7xl px-4 py-14">
+            {/* PAGE HEADER */}
+            <div className="mx-auto max-w-3xl text-center">
+              <h1 className="text-4xl font-semibold tracking-tight text-slate-900">
+                Simple, transparent pricing
+              </h1>
+              <p className="mt-3 text-base text-slate-600">
+                Choose a plan that fits your storage needs. Upgrade or downgrade
+                anytime.
+              </p>
+            </div>
 
-        {/* BILLING TOGGLE */}
-        <div className="mt-10 flex justify-center">
-          <div className="inline-flex rounded-full bg-slate-100 p-1 ring-1 ring-slate-200">
-            {["monthly", "yearly"].map((m) => {
-              const active = mode === m;
-              return (
-                <button
-                  key={m}
-                  onClick={() => setMode(m)}
-                  className={`rounded-full px-6 py-2 text-sm font-medium transition-all ${
-                    active
-                      ? "bg-blue-600 text-white shadow"
-                      : "text-slate-600 hover:text-slate-900"
-                  }`}
-                >
-                  {m === "monthly" ? "Monthly" : "Yearly"}
-                  {m === "yearly" && (
-                    <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                      Save 20%
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+            {/* BILLING TOGGLE */}
+            <div className="mt-10 flex justify-center">
+              <div className="inline-flex rounded-full bg-slate-100 p-1 ring-1 ring-slate-200">
+                {["monthly", "yearly"].map((m) => {
+                  const active = mode === m;
+                  return (
+                    <button
+                      key={m}
+                      onClick={() => setMode(m)}
+                      className={`rounded-full px-6 py-2 text-sm font-medium transition-all ${
+                        active
+                          ? "bg-blue-600 text-white shadow"
+                          : "text-slate-600 hover:text-slate-900"
+                      }`}
+                    >
+                      {m === "monthly" ? "Monthly" : "Yearly"}
+                      {m === "yearly" && (
+                        <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                          Save 20%
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
-        {/* PRICING GRID */}
-        <section className="mt-14">
-          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {SUBSCRIPTION_DATA[mode].map((plan) => (
-              <SubscriptionCards key={plan.id} plan={plan} />
-            ))}
-          </div>
-        </section>
+            {/* PRICING GRID */}
+            <section className="mt-14">
+              <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+                {SUBSCRIPTION_DATA[mode].map((plan) => (
+                  <SubscriptionCards key={plan.id} plan={plan} />
+                ))}
+              </div>
+            </section>
 
-        {/* FOOTER NOTE */}
-        <div className="mt-14 text-center">
-          <p className="text-xs text-slate-500">
-            Prices shown are for demonstration purposes only. Payments are
-            currently disabled.
-          </p>
+            {/* FOOTER NOTE */}
+            <div className="mt-14 text-center">
+              <p className="text-xs text-slate-500">
+                Prices shown are for demonstration purposes only. Payments are
+                currently disabled.
+              </p>
+            </div>
+          </main>
         </div>
-      </main>
-    </div>
+      </section>
+    </>
   );
 }

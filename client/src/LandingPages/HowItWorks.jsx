@@ -1,32 +1,30 @@
-import { UserPlus, CloudUpload, Share2 } from "lucide-react";
+import { UserPlus, CloudUpload, Unlock } from "lucide-react";
 
 const steps = [
   {
     step: 1,
     title: "Create an account",
-    description:
-      "Sign up for free in seconds. No credit card required to get started with 500MB of secure storage.",
+    description: "Sign up for free to get your secure storage.",
     icon: UserPlus,
   },
   {
     step: 2,
     title: "Upload your files",
     description:
-      "Drag and drop your documents, images, and videos. We support all major file types with high-speed upload.",
+      "Upload any type of files. We support all major file types with high-speed upload.",
     icon: CloudUpload,
   },
   {
     step: 3,
-    title: "Share & Access",
-    description:
-      "Generate secure links, set expiration dates, and access your files from any device, anywhere in the world.",
-    icon: Share2,
+    title: "Access",
+    description: "Access your files from any device, anywhere in the world.",
+    icon: Unlock,
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="bg-gray-50 py-24">
+    <section className="bg-gray-50 py-24 scroll-mt-24" id="how-it-works">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto">
@@ -34,7 +32,7 @@ export default function HowItWorks() {
             How it works
           </h2>
           <p className="mt-4 text-gray-600 text-lg">
-            Get started with Storemystuff in three simple steps.
+            Get started with StuffVault in three simple steps.
           </p>
         </div>
 

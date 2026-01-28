@@ -23,17 +23,48 @@ export default function Footer() {
           </div>
 
           {/* Product */}
+          {/* Product */}
           <div>
             <h4 className="text-sm font-semibold text-gray-900">Product</h4>
             <ul className="mt-4 space-y-3 text-sm text-gray-600">
-              {["Features", "How it Works", "Pricing"].map((item) => (
-                <li
-                  key={item}
-                  className="cursor-pointer hover:text-gray-900 transition"
+              <li>
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById("features")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="hover:text-gray-900 transition cursor-pointer"
                 >
-                  {item}
-                </li>
-              ))}
+                  Features
+                </button>
+              </li>
+
+              <li>
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById("how-it-works")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="hover:text-gray-900 transition cursor-pointer"
+                >
+                  How it Works
+                </button>
+              </li>
+
+              <li>
+                <button
+                  onClick={() =>
+                    document
+                      .getElementById("plans")
+                      ?.scrollIntoView({ behavior: "smooth" })
+                  }
+                  className="hover:text-gray-900 transition cursor-pointer"
+                >
+                  Pricing
+                </button>
+              </li>
             </ul>
           </div>
 

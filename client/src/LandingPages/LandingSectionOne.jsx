@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 
 export default function LandingSectionOne() {
   return (
-    <section className=" bg-red text-gray-900 max-w-6xl mx-auto lg:pt-20 pt-10">
+    <section className=" text-gray-900 max-w-6xl mx-auto lg:pt-20 pt-10">
       {/* ================= NAVBAR ================= */}
       <header className="fixed top-0 left-0 z-50 w-full  bg-white/90 backdrop-blur">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 cursor-pointer">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500">
                 <Cloud size={22} strokeWidth={1.5} className="text-white" />
               </div>
@@ -20,16 +20,39 @@ export default function LandingSectionOne() {
             </div>
 
             {/* Nav links */}
-            <nav className="hidden md:flex items-center gap-8 text-sm text-gray-600">
-              <a href="#" className="hover:text-gray-900 transition">
+            <nav className="hidden md:flex items-center gap-8 text-sm text-gray-600 ">
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("features")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="hover:text-gray-900 transition cursor-pointer"
+              >
                 Features
-              </a>
-              <a href="#" className="hover:text-gray-900 transition">
+              </button>
+
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("how-it-works")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="hover:text-gray-900 transition cursor-pointer"
+              >
                 How It Works
-              </a>
-              <a href="#" className="hover:text-gray-900 transition">
+              </button>
+
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("plans")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="hover:text-gray-900 transition cursor-pointer"
+              >
                 Plans
-              </a>
+              </button>
             </nav>
 
             {/* Actions */}
@@ -54,7 +77,7 @@ export default function LandingSectionOne() {
       {/* ================= HERO ================= */}
       <main className="flex  flex-col items-center justify-center px-4 text-center pt-16">
         <h1 className="max-w-4xl text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
-          Store everything in{" "}
+          Store everything in
           <span className="block mt-3 text-blue-600">one secure vault.</span>
         </h1>
 
@@ -66,12 +89,22 @@ export default function LandingSectionOne() {
 
         {/* CTA */}
         <div className="mt-10 flex flex-col sm:flex-row items-center gap-4">
-          <button className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition">
+          <Link
+            to={"/register"}
+            className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition"
+          >
             Start using Stuff Vault
             <ArrowRight className="h-4 w-4" />
-          </button>
+          </Link>
 
-          <button className="rounded-full border border-gray-300 px-6 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 transition">
+          <button
+            onClick={() => {
+              document
+                .getElementById("plans")
+                ?.scrollIntoView({ behavior: "smooth" });
+            }}
+            className="rounded-full border border-gray-300 px-6 py-3 text-sm font-medium text-gray-900 hover:bg-gray-50 transition cursor-pointer"
+          >
             View plans
           </button>
         </div>

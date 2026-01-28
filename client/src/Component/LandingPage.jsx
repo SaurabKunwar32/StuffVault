@@ -7,7 +7,7 @@ import LandingSectionCTA from "../LandingPages/LandingSectionCTA.jsx";
 import Footer from "../LandingPages/Footer.jsx";
 
 export default function LandingPage({ userData }) {
-  // ✅ Redirect logged-in users away from landing
+  // Redirect logged-in users away from landing
   if (userData) {
     return <Navigate to="/app" replace />;
   }

@@ -5,54 +5,55 @@ import {
   Share2,
   Settings,
   Zap,
+  CreditCard,
 } from "lucide-react";
 
 const features = [
   {
     icon: ShieldCheck,
-    title: "Enterprise-Grade Security",
+    title: "Secure by Default",
     description:
-      "Secure access with OAuth (Google & GitHub), 2FA, and encrypted storage. Your data is protected by industry-leading security standards.",
+      "Your files are protected with encrypted storage, secure authentication, and optional two-factor verification. Privacy and safety come first.",
     bg: "bg-blue-50",
     iconColor: "text-blue-600",
   },
   {
     icon: FileText,
-    title: "Intelligent File Management",
+    title: "Smart File Organization",
     description:
-      "Upload any file type with drag-and-drop ease. Organize with grid views, powerful search, and instant previews for documents and media.",
+      "Upload any file in seconds and keep everything organized with folders, grid or list views, instant previews, and fast search.",
     bg: "bg-purple-50",
     iconColor: "text-purple-600",
   },
   {
     icon: Cloud,
-    title: "Seamless Cloud Integration",
+    title: "Reliable Cloud Storage",
     description:
-      "Import directly from Google Drive and enjoy lightning-fast global access via CloudFront CDN and AWS S3 storage.",
+      "Store your files safely in the cloud and access them anytime from any device with high availability and fast load times.",
     bg: "bg-emerald-50",
     iconColor: "text-emerald-600",
   },
   {
-    icon: Share2,
-    title: "Advanced Sharing Controls",
+    icon: CreditCard,
+    title: "Simple & Transparent Payments",
     description:
-      "Share securely with granular permissions. Control who views or edits your files with role-based access and real-time activity logs.",
+      "Upgrade your storage anytime with clear pricing and secure payments. No hidden fees, no surprises—pay only for what you use.",
     bg: "bg-orange-50",
     iconColor: "text-orange-600",
   },
   {
     icon: Settings,
-    title: "Comprehensive Admin Tools",
+    title: "Full Account Control",
     description:
-      "Manage users, monitor storage usage, and control system-wide settings from a powerful, centralized dashboard.",
+      "Manage your storage, track usage, and customize settings from a simple, intuitive dashboard built for everyday users.",
     bg: "bg-pink-50",
     iconColor: "text-pink-600",
   },
   {
     icon: Zap,
-    title: "Lightning Fast Performance",
+    title: "Fast & Smooth Experience",
     description:
-      "Experience zero latency with optimized global content delivery, ensuring your files are always available when you need them.",
+      "Optimized performance ensures quick uploads, instant previews, and smooth navigation—no waiting, no lag.",
     bg: "bg-yellow-50",
     iconColor: "text-yellow-600",
   },
@@ -60,7 +61,7 @@ const features = [
 
 export default function LandingSectionTwo() {
   return (
-    <section className="bg-white py-20">
+    <section className="bg-white py-20 scroll-mt-24" id="features">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* Header */}
         <div className="text-center max-w-3xl mx-auto">
@@ -73,7 +74,7 @@ export default function LandingSectionTwo() {
         </div>
 
         {/* Grid */}
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 ">
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-6xl mx-auto ">
           {features.map((feature, index) => {
             const Icon = feature.icon;
             return (
