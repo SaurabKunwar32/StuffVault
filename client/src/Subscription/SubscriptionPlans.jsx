@@ -1,7 +1,6 @@
 import { useState } from "react";
 import SubscriptionCards from "./SubscriptionCards.jsx";
-import { ChevronLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import Header from "../Component/Header.jsx";
 
 const SUBSCRIPTION_DATA = {
   monthly: [
@@ -110,55 +109,44 @@ const SUBSCRIPTION_DATA = {
   ],
 };
 
-export default function SubscriptionPlans() {
-  const navigate = useNavigate();
+export default function SubscriptionPlans({ setUserData, userData }) {
+  // const navigate = useNavigate();
 
   const [mode, setMode] = useState("monthly");
 
   return (
-    <div className="relative bg-slate-50/60 py-12">
-      <div className="mx-auto max-w-6xl px-4">
-        {/* Header */}
-        <header className="relative mb-10">
-          {/* Back button */}
-          <button
-            onClick={() => navigate(-1)}
-            className="group absolute left-0 top-1 inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-          >
-            <ChevronLeft
-              size={18}
-              className="transition-transform group-hover:-translate-x-0.5"
-            />
-            <span>Back</span>
-          </button>
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white max-w-[1540px] mx-auto">
+      {/* GLOBAL HEADER */}
+      {userData ? <Header userData={userData} setUserData={setUserData} /> : ""}
+      {/* PAGE CONTAINER */}
+      <main className="mx-auto max-w-7xl px-4 py-14">
+        {/* PAGE HEADER */}
+        <div className="mx-auto max-w-3xl text-center">
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-900">
+            Simple, transparent pricing
+          </h1>
+          <p className="mt-3 text-base text-slate-600">
+            Choose a plan that fits your storage needs. Upgrade or downgrade
+            anytime.
+          </p>
+        </div>
 
-          {/* Title */}
-          <div className="text-center">
-            <h1 className="text-3xl font-semibold tracking-tight text-slate-900">
-              Simple, transparent pricing
-            </h1>
-            <p className="mt-2 text-sm text-slate-600">
-              Choose a plan that fits your usage. Upgrade or downgrade anytime.
-            </p>
-          </div>
-        </header>
-
-        {/* Billing Toggle */}
-        <div className="mb-10 flex justify-center">
-          <div className="inline-flex rounded-2xl bg-white p-1 shadow-sm ring-1 ring-slate-200">
+        {/* BILLING TOGGLE */}
+        <div className="mt-10 flex justify-center">
+          <div className="inline-flex rounded-full bg-slate-100 p-1 ring-1 ring-slate-200">
             {["monthly", "yearly"].map((m) => {
               const active = mode === m;
               return (
                 <button
                   key={m}
                   onClick={() => setMode(m)}
-                  className={`relative rounded-xl px-6 py-2.5 text-sm font-medium transition-all ${
+                  className={`rounded-full px-6 py-2 text-sm font-medium transition-all ${
                     active
-                      ? "bg-blue-600 text-white shadow-sm"
+                      ? "bg-blue-600 text-white shadow"
                       : "text-slate-600 hover:text-slate-900"
                   }`}
                 >
-                  {m === "monthly" ? "Monthly billing" : "Yearly billing"}
+                  {m === "monthly" ? "Monthly" : "Yearly"}
                   {m === "yearly" && (
                     <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
                       Save 20%
@@ -170,19 +158,23 @@ export default function SubscriptionPlans() {
           </div>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {SUBSCRIPTION_DATA[mode].map((plan) => (
-            <SubscriptionCards key={plan.id} plan={plan} />
-          ))}
-        </div>
+        {/* PRICING GRID */}
+        <section className="mt-14">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {SUBSCRIPTION_DATA[mode].map((plan) => (
+              <SubscriptionCards key={plan.id} plan={plan} />
+            ))}
+          </div>
+        </section>
 
-        {/* Footer Note */}
-        <p className="mt-8 text-center text-xs text-slate-500">
-          Prices shown are for demonstration purposes only. Payments are
-          currently disabled.
-        </p>
-      </div>
+        {/* FOOTER NOTE */}
+        <div className="mt-14 text-center">
+          <p className="text-xs text-slate-500">
+            Prices shown are for demonstration purposes only. Payments are
+            currently disabled.
+          </p>
+        </div>
+      </main>
     </div>
   );
 }

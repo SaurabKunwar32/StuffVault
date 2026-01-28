@@ -8,6 +8,10 @@ import { loginUser } from "../apis/userApi.js";
 import { fetchUser } from "../apis/userApi.js";
 
 export default function Login({ setUserData }) {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const [formData, setFormData] = useState({
     email: "keme88@gmail.com",
     password: "abcd",

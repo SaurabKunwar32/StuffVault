@@ -6,22 +6,10 @@ import { useDirectoryContext } from "../context/DirectoryContext";
 export default function DirectoryList() {
     const {
     items,
-    handleRowClick,
     errorMessage,
-    activeContextMenu,
-    contextMenuPos,
-    handleContextMenu,
-    getFileIcon,
     showInLines,
-    isUploading,
     progressMap,
-    handleCancelUpload,
-    setDeleteItem,
-    setShowDeleteModal,
-    openRenameModal,
-    openDetailsPopup,
     breadCrumb,
-    BASE_URL,
   } = useDirectoryContext();
   // const breadcrumb=[{saurab},{fjsf}]
   // console.log(breadCrumb);
@@ -33,7 +21,7 @@ export default function DirectoryList() {
         <div className="flex items-center gap-2 text-sm text-gray-600 overflow-x-auto whitespace-nowrap scrollbar-hide">
           {/* Home */}
           <Link
-            to="/"
+            to="/app"
             className="flex items-center gap-1.5 font-medium text-gray-700 hover:text-blue-600 transition-colors"
           >
             <Home size={16} />
@@ -92,7 +80,7 @@ export default function DirectoryList() {
           }
         >
           {items.map((item) => {
-            const uploadProgress = progressMap[item.id] || 0;
+            {/* const uploadProgress = progressMap[item.id] || 0; */}
 
             return (
               <DirectoryItem

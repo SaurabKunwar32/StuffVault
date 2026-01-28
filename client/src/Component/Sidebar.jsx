@@ -29,17 +29,10 @@ export default function Sidebar({ userData }) {
   return (
     <aside className="w-64 bg-white border-r flex flex-col px-4 py-5">
       {/* Logo / Title */}
-      <div className="flex items-center gap-3 mb-8">
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 shadow-sm">
-          <Cloud size={22} className="text-white" />
-        </div>
-        <span className="text-lg font-semibold text-gray-900 tracking-tight">
-          StuffVault
-        </span>
-      </div>
+    
 
       {/* Navigation */}
-      <nav className="space-y-1 text-sm">
+      <nav className="space-y-1 text-sm opacity-50">
         <NavItem icon={Home} label="Home" active />
         <NavItem icon={Star} label="Starred" />
         <NavItem icon={Share2} label="Shared" />

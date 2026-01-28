@@ -1,51 +1,33 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
-import RegistrationForm from "./Forms/Register";
-import Login from "./Forms/Login";
-import VerifyOtp from "./Forms/VerifyOtp.jsx";
+import RegistrationForm from "./Forms/Register.jsx";
 import MainView from "./Component/MainView.jsx";
+import Login from "./Forms/Login.jsx";
+import VerifyOtp from "./Forms/VerifyOtp.jsx";
 import UsersPage from "./Component/UsersPage.jsx";
 import Settings from "./Component/Settings.jsx";
 import SubscriptionPlans from "./Subscription/SubscriptionPlans.jsx";
 import LandingPage from "./Component/LandingPage.jsx";
-import InvalidRoute from "./Component/InvalidRoute.jsx";
 
 import { fetchUser } from "./apis/userApi.js";
 import PublicRoute from "./Routes/PublicRoute.jsx";
 import ProtectedRoute from "./Routes/ProtectedRoute.jsx";
 import RoleRoute from "./Routes/RoleRoute.jsx";
-import { useLocation } from "react-router-dom";
-import Header from "./Component/Header.jsx";
+import InvalidRoute from "./Component/InvalidRoute.jsx";
 
 export default function AppRoutes() {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const location = useLocation();
 
-  const PROTECTED_PREFIXES = [
-    "/app",
-    "/directory",
-    "/users",
-    "/setting",
-    "/subplans",
-  ];
+  
 
-  // 🔐 Only fetch user if the route is protected
+  // 🔐 Fetch user ONCE on app load
   useEffect(() => {
     let mounted = true;
 
     async function loadUser() {
-      if (
-        !PROTECTED_PREFIXES.some((prefix) =>
-          location.pathname.startsWith(prefix),
-        )
-      ) {
-        setLoading(false); // public page, skip fetch
-        return;
-      }
-
       try {
         const data = await fetchUser();
         if (mounted) setUserData(data);
@@ -58,22 +40,27 @@ export default function AppRoutes() {
 
     loadUser();
 
-    return () => (mounted = false);
-  }, [location.pathname]);
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <Routes>
-      {/* LANDING */}
-      <Route path="/" element={<LandingPage />} />
+      {/* ================= LANDING ================= */}
+      <Route path="/" element={<LandingPage userData={userData} />} />
 
-      {/* PUBLIC ROUTES */}
+      {/* ================= PUBLIC ================= */}
       <Route element={<PublicRoute user={userData} loading={loading} />}>
         <Route path="/login" element={<Login setUserData={setUserData} />} />
         <Route path="/register" element={<RegistrationForm />} />
         <Route path="/verify" element={<VerifyOtp />} />
+
+        {/* Public 404 */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
 
-      {/* PROTECTED ROUTES */}
+      {/* ================= PROTECTED ================= */}
       <Route element={<ProtectedRoute user={userData} loading={loading} />}>
         <Route
           path="/app"
@@ -97,25 +84,33 @@ export default function AppRoutes() {
           }
         />
 
-        <Route path="/subplans" element={<SubscriptionPlans userData={userData} setUserData={setUserData} />} />
-        <Route path="*" element={<InvalidRoute />} />
+        {/* handle the default routes */}
+        <Route path="/directory/:dirId/*" element={<InvalidRoute />} />
+
+        <Route path="/subplans" element={<SubscriptionPlans />} />
+
         <Route
           path="/setting"
           element={<Settings setUserData={setUserData} />}
         />
 
-        {/* ROLE BASED */}
+        {/* ===== ROLE BASED ===== */}
         <Route
           element={
             <RoleRoute
               user={userData}
-              loading={loading}
               allowedRoles={["Admin", "Owner", "Manager"]}
             />
           }
         >
-          <Route path="/users" element={<UsersPage />} />
+          <Route
+            path="/users"
+            element={<UsersPage setUserData={setUserData} />}
+          />
         </Route>
+
+        {/* Protected 404 */}
+        <Route path="*" element={<Navigate to="/app" replace />} />
       </Route>
     </Routes>
   );

@@ -1,12 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import {  Cloud, Github } from "lucide-react";
+import { Cloud, Github } from "lucide-react";
 import { loginWithGoogle } from "../apis/loginWithGoogle.js";
 import { loginWithGithub } from "../apis/loginWithGithub.js";
 import { sendOtp } from "../apis/authApi.js";
 
 export default function Register() {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   const [formData, setFormData] = useState({
     name: "saurab ",
     email: "keme88@gmail.com",

@@ -262,7 +262,7 @@ export default function UsersPage({ setUserData }) {
       {/* Top Bar */}
       <header className="w-full bg-white shadow-sm py-4 px-6 flex justify-between items-center">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/app")}
           className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition"
         >
           <ArrowLeft className="w-4 h-4" /> Back

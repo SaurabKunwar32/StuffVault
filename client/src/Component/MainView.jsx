@@ -24,6 +24,7 @@ import {
   renameDirectory,
 } from "../apis/directoryApi.js";
 import Sidebar from "./Sidebar.jsx";
+import ActionBar from "./ActionBar.jsx";
 // import { fetchUser } from "../apis/userApi.js";
 
 export default function DirectoryView({ userData, loading, setUserData }) {
@@ -141,8 +142,12 @@ export default function DirectoryView({ userData, loading, setUserData }) {
   // Navigation
   // Click row to open directory or file
   function handleRowClick(type, id) {
-    if (type === "directory") navigate(`/directory/${id}`);
-    else window.location.href = `${BASE_URL}/file/${id}`;
+    if (type === "directory") {
+      navigate(`/directory/${id}`);
+    } else {
+      const fileUrl = `${BASE_URL}/file/${id}`;
+      window.open(fileUrl, "_blank", "noopener,noreferrer");
+    }
   }
 
   //   FILE UPLOAD (SINGLE FILE)
@@ -442,114 +447,129 @@ export default function DirectoryView({ userData, loading, setUserData }) {
           </div>
         )}
 
-      <div className="flex h-screen ">
-        <Sidebar userData={userData} />
+      <div className="h-screen flex flex-col max-w-[1540px] mx-auto">
+        {/* <Header
+          userData={userData}
+          setUserData={setUserData}
+          onCreateFolderClick={() => setShowCreateDirModal(true)}
+          onUploadFilesClick={() => fileInputRef.current.click()}
+          fileInputRef={fileInputRef}
+          handleFileSelect={handleFileSelect}
+          SetShowInLines={SetShowInLines}
+          // Disable if the user doesn't have access
+          disabled={
+            errorMessage ===
+            "Directory not found or you do not have access to it!"
+          }
+        /> */}
 
-        <div className="flex-1 flex flex-col">
-          {showSuccessMessage && (
-            <div className="fixed top-6 right-6 z-50 animate-slide-in">
-              <div className="flex items-center gap-3 px-5 py-4 bg-green-50 border-l-4 border-green-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
-                {/* Success Icon */}
-                <CheckCircle2 className="w-6 h-6 text-green-600" />
+        <Header userData={userData} setUserData={setUserData} />
 
-                {/* Message */}
-                <div className="flex-1">
-                  <p className="text-sm text-green-800 font-medium leading-snug">
-                    {showSuccessMessage}
-                  </p>
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar userData={userData} />
+
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <ActionBar
+              onCreateFolderClick={() => setShowCreateDirModal(true)}
+              onUploadFilesClick={() => fileInputRef.current.click()}
+              fileInputRef={fileInputRef}
+              handleFileSelect={handleFileSelect}
+              SetShowInLines={SetShowInLines}
+              disabled={
+                errorMessage ===
+                "Directory not found or you do not have access to it!"
+              }
+            />
+            {showSuccessMessage && (
+              <div className="fixed top-6 right-6 z-50 animate-slide-in">
+                <div className="flex items-center gap-3 px-5 py-4 bg-green-50 border-l-4 border-green-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
+                  {/* Success Icon */}
+                  <CheckCircle2 className="w-6 h-6 text-green-600" />
+
+                  {/* Message */}
+                  <div className="flex-1">
+                    <p className="text-sm text-green-800 font-medium leading-snug">
+                      {showSuccessMessage}
+                    </p>
+                  </div>
+
+                  {/* Close Button (Centered) */}
+                  <button
+                    onClick={() => setShowSuccessMessage("")}
+                    className="text-green-600 hover:text-green-800 transition ml-2"
+                    aria-label="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
-
-                {/* Close Button (Centered) */}
-                <button
-                  onClick={() => setShowSuccessMessage("")}
-                  className="text-green-600 hover:text-green-800 transition ml-2"
-                  aria-label="Close"
-                >
-                  <X className="w-4 h-4" />
-                </button>
               </div>
-            </div>
-          )}
+            )}
 
-          <Header
-            userData={userData}
-            setUserData={setUserData}
-            onCreateFolderClick={() => setShowCreateDirModal(true)}
-            onUploadFilesClick={() => fileInputRef.current.click()}
-            fileInputRef={fileInputRef}
-            handleFileSelect={handleFileSelect}
-            SetShowInLines={SetShowInLines}
-            // Disable if the user doesn't have access
-            disabled={
-              errorMessage ===
-              "Directory not found or you do not have access to it!"
-            }
-          />
+            {showCreateDirModal && (
+              <DirectoryModel
+                newDirname={newDirname}
+                setNewDirname={setNewDirname}
+                onClose={() => setShowCreateDirModal(false)}
+                onCreateDirectory={handleCreateDirectory}
+              />
+            )}
 
-          {showCreateDirModal && (
-            <DirectoryModel
-              newDirname={newDirname}
-              setNewDirname={setNewDirname}
-              onClose={() => setShowCreateDirModal(false)}
-              onCreateDirectory={handleCreateDirectory}
-            />
-          )}
+            {/* Rename Modal */}
+            {showRenameModal && (
+              <RenameModal
+                renameType={renameType}
+                renameValue={renameValue}
+                setRenameValue={setRenameValue}
+                onClose={() => setShowRenameModal(false)}
+                onRenameSubmit={handleRenameSubmit}
+                renameErrorsMessage={renameErrorsMessage}
+              />
+            )}
 
-          {/* Rename Modal */}
-          {showRenameModal && (
-            <RenameModal
-              renameType={renameType}
-              renameValue={renameValue}
-              setRenameValue={setRenameValue}
-              onClose={() => setShowRenameModal(false)}
-              onRenameSubmit={handleRenameSubmit}
-              renameErrorsMessage={renameErrorsMessage}
-            />
-          )}
+            {showDeleteModal && deleteItem && (
+              <DeleteModal
+                deleteType={deleteItem.isDirectory ? "directory" : "file"}
+                deleteName={deleteItem.name}
+                onClose={() => setShowDeleteModal(false)}
+                onDelete={() => {
+                  if (deleteItem.isDirectory) {
+                    handleDeleteDirectory(deleteItem.id);
+                  } else {
+                    handleDeleteFile(deleteItem.id);
+                  }
+                  setShowDeleteModal(false);
+                }}
+              />
+            )}
 
-          {showDeleteModal && deleteItem && (
-            <DeleteModal
-              deleteType={deleteItem.isDirectory ? "directory" : "file"}
-              deleteName={deleteItem.name}
-              onClose={() => setShowDeleteModal(false)}
-              onDelete={() => {
-                if (deleteItem.isDirectory) {
-                  handleDeleteDirectory(deleteItem.id);
-                } else {
-                  handleDeleteFile(deleteItem.id);
-                }
-                setShowDeleteModal(false);
+            {detailsItem && (
+              <DetailsPopup item={detailsItem} onClose={closeDetailsPopup} />
+            )}
+
+            <DirectoryContext.Provider
+              value={{
+                items: CombinedItems,
+                handleRowClick,
+                errorMessage,
+                activeContextMenu,
+                contextMenuPos,
+                handleContextMenu,
+                getFileIcon,
+                showInLines,
+                isUploading,
+                progressMap,
+                handleCancelUpload,
+                setDeleteItem,
+                setShowDeleteModal,
+                openRenameModal,
+                openDetailsPopup,
+                breadCrumb,
+                BASE_URL,
               }}
-            />
-          )}
-
-          {detailsItem && (
-            <DetailsPopup item={detailsItem} onClose={closeDetailsPopup} />
-          )}
-
-          <DirectoryContext.Provider
-            value={{
-              items: CombinedItems,
-              handleRowClick,
-              errorMessage,
-              activeContextMenu,
-              contextMenuPos,
-              handleContextMenu,
-              getFileIcon,
-              showInLines,
-              isUploading,
-              progressMap,
-              handleCancelUpload,
-              setDeleteItem,
-              setShowDeleteModal,
-              openRenameModal,
-              openDetailsPopup,
-              breadCrumb,
-              BASE_URL,
-            }}
-          >
-            <DirectoryList />
-          </DirectoryContext.Provider>
+            >
+              <DirectoryList />
+            </DirectoryContext.Provider>
+          </div>
         </div>
       </div>
     </>
