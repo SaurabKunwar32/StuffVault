@@ -174,6 +174,7 @@ export const callbackGithub = async (req, res, next) => {
     }
 
     const { code } = data;
+    // console.log(data);
     if (!code) return res.status(400).json({
         error: "GitHub OAuth failed: Authorization code is missing or invalid. Please try logging in again."
     });

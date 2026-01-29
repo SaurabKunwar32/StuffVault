@@ -242,7 +242,7 @@ export const logoutById = async (req, res) => {
     }
 
     if (deletedCount > 0) {
-      console.log(`Cleared ${deletedCount} sessions for user ${userId}`);
+      // console.log(`Cleared ${deletedCount} sessions for user ${userId}`);
       res.status(200).json({ message: "User logged out successfully" });
     } else {
       res.status(404).json({ message: "No active session found for this user" });

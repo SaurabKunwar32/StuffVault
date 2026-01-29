@@ -62,7 +62,7 @@ const mainThrottle = {
     getFiles: createThrottle("getFiles", 2500, 3, 300),
 
     // directory
-    getDirectory: createThrottle("getDirectory", 2000, 3, 300),
+    getDirectory: createThrottle("getDirectory", 1000, 2, 300),
 
 };
 
