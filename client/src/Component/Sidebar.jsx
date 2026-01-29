@@ -1,19 +1,19 @@
 import {
-  Cloud,
   Home,
-  Star,
-  Share2,
-  Trash2,
   HardDrive,
+  Settings,
+  LayoutDashboard,
   ArrowUpRight,
   Sparkles,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar({ userData }) {
   const [maxStorageInBytes, setMaxStorageInBytes] = useState(1073741824);
   const [usedStorageInBytes, setUsedStorageInBytes] = useState(0);
+
+  const { pathname } = useLocation();
 
   const usedGB = usedStorageInBytes / 1024 ** 3;
   const totalGB = maxStorageInBytes / 1024 ** 3;
@@ -28,15 +28,32 @@ export default function Sidebar({ userData }) {
 
   return (
     <aside className="w-64 bg-white border-r flex flex-col px-4 py-5">
-      {/* Logo / Title */}
-    
-
       {/* Navigation */}
-      <nav className="space-y-1 text-sm opacity-50">
-        <NavItem icon={Home} label="Home" active />
-        <NavItem icon={Star} label="Starred" />
-        <NavItem icon={Share2} label="Shared" />
-        <NavItem icon={Trash2} label="Bin" />
+      <nav className="space-y-1 text-sm">
+        <NavItem
+          icon={Home}
+          label="Home"
+          to="/app"
+          active={pathname === "/app"}
+        />
+
+        <NavItem
+          icon={Settings}
+          label="Settings"
+          to="/setting"
+          active={pathname.startsWith("/setting")}
+        />
+
+        {(userData?.role === "Owner" ||
+          userData?.role === "Admin" ||
+          userData?.role === "Manager") && (
+          <NavItem
+            icon={LayoutDashboard}
+            label="Dashboard"
+            to="/users"
+            active={pathname.startsWith("/users")}
+          />
+        )}
       </nav>
 
       {/* Storage Section */}
@@ -47,7 +64,6 @@ export default function Sidebar({ userData }) {
             Storage usage
           </div>
 
-          {/* Progress bar */}
           <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
               className={`h-full transition-all duration-300 ${
@@ -57,22 +73,20 @@ export default function Sidebar({ userData }) {
             />
           </div>
 
-          {/* Usage text */}
           <div className="mt-2 flex justify-between text-xs text-gray-600">
             <span>{usedGB.toFixed(2)} GB used</span>
             <span>{totalGB.toFixed(2)} GB total</span>
           </div>
         </div>
 
-        {/* Upgrade Button */}
         <Link
           to="/subplans"
           className="group mt-4 flex w-full items-center justify-center gap-2
-             rounded-lg bg-black px-3 py-2
-             text-xs font-semibold text-white
-             transition-all duration-200
-             hover:bg-gray-900 hover:shadow-md
-             focus:outline-none focus:ring-2 focus:ring-black/30"
+            rounded-lg bg-black px-3 py-2
+            text-xs font-semibold text-white
+            transition-all duration-200
+            hover:bg-gray-900 hover:shadow-md
+            focus:outline-none focus:ring-2 focus:ring-black/30"
         >
           <Sparkles size={14} className="opacity-80" />
           Upgrade Storage
@@ -87,14 +101,19 @@ export default function Sidebar({ userData }) {
 }
 
 /* Reusable Nav Item */
-function NavItem({ icon: Icon, label, active }) {
+function NavItem({ icon: Icon, label, to, active }) {
   return (
-    <button
+    <Link
+      to={to}
       className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 transition
-        ${active ? "bg-black text-white" : "text-gray-700 hover:bg-gray-100"}`}
+        ${
+          active
+            ? "bg-black text-white shadow-sm"
+            : "text-gray-700 hover:bg-gray-100"
+        }`}
     >
       <Icon size={16} />
       <span className="font-medium">{label}</span>
-    </button>
+    </Link>
   );
 }

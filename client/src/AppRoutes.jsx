@@ -16,7 +16,6 @@ import PublicRoute from "./Routes/PublicRoute.jsx";
 import ProtectedRoute from "./Routes/ProtectedRoute.jsx";
 import RoleRoute from "./Routes/RoleRoute.jsx";
 import { useLocation } from "react-router-dom";
-import Header from "./Component/Header.jsx";
 import Terms from "./LegalPages/Terms.jsx";
 import Privacy from "./LegalPages/Privacy.jsx";
 
@@ -34,7 +33,7 @@ export default function AppRoutes() {
     "/subplans",
   ];
 
-  // 🔐 Only fetch user if the route is protected
+  // Only fetch user if the route is protected
   useEffect(() => {
     let mounted = true;
 

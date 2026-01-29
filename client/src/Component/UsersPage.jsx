@@ -8,7 +8,6 @@ import {
   Users,
   CheckCircle,
   Zap,
-  ArrowLeft,
 } from "lucide-react";
 import ConfirmActionModal from "../Models/ConfirmActionModal.jsx";
 import {
@@ -614,85 +613,3 @@ export default function UsersPage({ setUserData }) {
   );
 }
 
-
-{/* <div className="space-y-4 md:hidden">
-  {users.map((user) => (
-    <div
-      key={user.id}
-      className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm"
-    >
-      <div className="flex justify-between items-start">
-        <div>
-          <h3 className="font-semibold text-gray-900">{user.name}</h3>
-          <p className="text-sm text-gray-600">{user.email}</p>
-        </div>
-
-        <span
-          className={`px-2 py-1 rounded-full text-xs font-semibold ${
-            user.isLoggedIn
-              ? "bg-green-100 text-green-700"
-              : "bg-gray-200 text-gray-600"
-          }`}
-        >
-          {user.isLoggedIn ? "Online" : "Offline"}
-        </span>
-      </div>
-
-      <div className="mt-4 flex flex-wrap gap-2">
-        <span className="text-sm font-medium text-gray-700">
-          Role:
-        </span>
-
-        {userRole === "Admin" || userRole === "Owner" ? (
-          <select
-            value={user.role}
-            onChange={(e) => updateUserRole(user.id, e.target.value)}
-            className="rounded-full px-3 py-1 text-sm font-semibold border"
-          >
-            <option>Admin</option>
-            <option>Owner</option>
-            <option>Manager</option>
-            <option>User</option>
-          </select>
-        ) : (
-          <span className="px-3 py-1 rounded-full bg-gray-100 text-sm font-semibold">
-            {user.role}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-4 flex gap-3">
-        <button
-          disabled={!user.isLoggedIn}
-          onClick={() =>
-            setConfirmModal({ isOpen: true, type: "logout", user })
-          }
-          className={`flex-1 py-2 rounded-lg text-sm font-medium ${
-            user.isLoggedIn
-              ? "bg-yellow-500 text-white"
-              : "bg-gray-300 text-gray-500 cursor-not-allowed"
-          }`}
-        >
-          Logout
-        </button>
-
-        {(userRole === "Admin" || userRole === "Owner") && (
-          <button
-            disabled={userEmail === user.email}
-            onClick={() =>
-              setConfirmModal({ isOpen: true, type: "delete", user })
-            }
-            className={`flex-1 py-2 rounded-lg text-sm font-medium ${
-              userEmail === user.email
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-red-500 text-white"
-            }`}
-          >
-            Delete
-          </button>
-        )}
-      </div>
-    </div>
-  ))}
-</div> */}
-  

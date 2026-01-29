@@ -27,7 +27,7 @@ import Sidebar from "./Sidebar.jsx";
 import ActionBar from "./ActionBar.jsx";
 // import { fetchUser } from "../apis/userApi.js";
 
-export default function DirectoryView({ userData, loading, setUserData }) {
+export default function MainView({ userData, loading, setUserData }) {
   const BASE_URL = "http://localhost:3000";
 
   const { dirId } = useParams();
@@ -65,7 +65,6 @@ export default function DirectoryView({ userData, loading, setUserData }) {
   const fileInputRef = useRef(null);
   const xhrRef = useRef(null);
   const [uploadItem, setUploadItem] = useState(null);
-  // { id, file, name, size, progress, isUploading }
 
   const openDetailsPopup = (item) => {
     setDetailsItem(item);
@@ -158,7 +157,7 @@ export default function DirectoryView({ userData, loading, setUserData }) {
 
     if (uploadItem?.isUploading) {
       setErrorMessage("An upload is already in progress.");
-      setTimeout(() => setErrorMessage(""), 3000);
+      setTimeout(() => setErrorMessage(""), 2000);
       e.target.value = "";
       return;
     }
@@ -193,7 +192,7 @@ export default function DirectoryView({ userData, loading, setUserData }) {
       if (err.status === 507 || 413) {
         setErrorMessage(err.response.data.error);
       }
-      setTimeout(() => setErrorMessage(""), 3000);
+      setTimeout(() => setErrorMessage(""), 2000);
       // console.log(err);
     }
   }
@@ -206,10 +205,18 @@ export default function DirectoryView({ userData, loading, setUserData }) {
     xhr.open("PUT", uploadUrl);
 
     xhr.upload.onprogress = (evt) => {
-      if (evt.lengthComputable) {
-        const progress = (evt.loaded / evt.total) * 100;
-        setUploadItem((prev) => (prev ? { ...prev, progress } : prev));
-      }
+      if (!evt.lengthComputable) return;
+
+      setUploadItem((prev) =>
+        prev
+          ? {
+              ...prev,
+              progress: Math.round((evt.loaded / evt.total) * 100),
+              uploadedBytes: evt.loaded,
+              totalBytes: evt.total,
+            }
+          : prev,
+      );
     };
 
     xhr.onload = async () => {
@@ -217,11 +224,11 @@ export default function DirectoryView({ userData, loading, setUserData }) {
       if (xhr.status === 200) {
         const fileUploadResponse = await uploadComplete(filId);
         setShowSuccessMessage(fileUploadResponse.message);
-        setTimeout(() => setShowSuccessMessage(""), 3000);
+        setTimeout(() => setShowSuccessMessage(""), 2000);
         // console.log(fileUploadResponse.message);
       } else {
         setErrorMessage("File not uploded !!");
-        setTimeout(() => setErrorMessage(""), 3000);
+        setTimeout(() => setErrorMessage(""), 2000);
       }
       setUploadItem(null);
       loadDirectory();
@@ -232,14 +239,14 @@ export default function DirectoryView({ userData, loading, setUserData }) {
       // Remove temp item from the list
       setFilesList((prev) => prev.filter((f) => f.id !== item.id));
       setUploadItem(null);
-      setTimeout(() => setErrorMessage(""), 3000);
+      setTimeout(() => setErrorMessage(""), 2000);
     };
 
     xhr.onabort = async () => {
       try {
         const res = await uploadCancel(filId); // NEW
         setErrorMessage(res.message);
-        setTimeout(() => setErrorMessage(""), 3000);
+        setTimeout(() => setErrorMessage(""), 2000);
       } catch (e) {
         console.log(e);
         // ignore — cleanup job will handle it
@@ -265,7 +272,7 @@ export default function DirectoryView({ userData, loading, setUserData }) {
     try {
       const response = await deleteDirectory(id);
       setShowSuccessMessage(response.message);
-      setTimeout(() => setShowSuccessMessage(""), 3000);
+      setTimeout(() => setShowSuccessMessage(""), 2000);
       // await handleFetchErrors(response);
       // console.log(response);
       loadDirectory();
@@ -282,7 +289,7 @@ export default function DirectoryView({ userData, loading, setUserData }) {
       const response = await deleteFile(id);
       // console.log(response);
       setShowSuccessMessage(response.message);
-      setTimeout(() => setShowSuccessMessage(""), 3000);
+      setTimeout(() => setShowSuccessMessage(""), 2000);
       // await handleFetchErrors(response);
       loadDirectory();
     } catch (err) {
@@ -297,7 +304,7 @@ export default function DirectoryView({ userData, loading, setUserData }) {
     try {
       const response = await createDirectory(dirId, newDirname);
       setShowSuccessMessage(response.message);
-      setTimeout(() => setShowSuccessMessage(""), 3000);
+      setTimeout(() => setShowSuccessMessage(""), 2000);
       // await handleFetchErrors(response);
       // console.log(response);
       setNewDirname("New Folder");
@@ -411,10 +418,17 @@ export default function DirectoryView({ userData, loading, setUserData }) {
   }, [errorMessage]);
 
   // For compatibility with children expecting these values:
-  const isUploading = !!uploadItem?.isUploading;
-  const progressMap = uploadItem
-    ? { [uploadItem.id]: uploadItem.progress || 0 }
+  const uploadMap = uploadItem
+    ? {
+        [uploadItem.id]: {
+          progress: uploadItem.progress,
+          uploadedBytes: uploadItem.uploadedBytes,
+          totalBytes: uploadItem.totalBytes,
+          isUploading: uploadItem.isUploading,
+        },
+      }
     : {};
+
 
   return (
     <>
@@ -448,20 +462,6 @@ export default function DirectoryView({ userData, loading, setUserData }) {
         )}
 
       <div className="h-screen flex flex-col max-w-[1540px] mx-auto">
-        {/* <Header
-          userData={userData}
-          setUserData={setUserData}
-          onCreateFolderClick={() => setShowCreateDirModal(true)}
-          onUploadFilesClick={() => fileInputRef.current.click()}
-          fileInputRef={fileInputRef}
-          handleFileSelect={handleFileSelect}
-          SetShowInLines={SetShowInLines}
-          // Disable if the user doesn't have access
-          disabled={
-            errorMessage ===
-            "Directory not found or you do not have access to it!"
-          }
-        /> */}
 
         <Header userData={userData} setUserData={setUserData} />
 
@@ -556,8 +556,7 @@ export default function DirectoryView({ userData, loading, setUserData }) {
                 handleContextMenu,
                 getFileIcon,
                 showInLines,
-                isUploading,
-                progressMap,
+                uploadMap,
                 handleCancelUpload,
                 setDeleteItem,
                 setShowDeleteModal,

@@ -5,8 +5,6 @@ import {
   LogOut,
   LogIn,
   ChevronDown,
-  LayoutDashboard,
-  Settings,
   Cloud,
 } from "lucide-react";
 import { logoutUser, logoutAllSessions } from "../apis/userApi.js";
@@ -15,7 +13,7 @@ export default function Header({ userData, setUserData }) {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState("Guest User");
-  const [userRole, setUserRole] = useState("User");
+  // const [userRole, setUserRole] = useState("User");
   const [userEmail, setUserEmail] = useState("guest@example.com");
   const [userPicture, setUserPicture] = useState("");
 
@@ -32,7 +30,7 @@ export default function Header({ userData, setUserData }) {
     }
 
     setLoggedIn(true);
-    setUserRole(userData.role);
+    // setUserRole(userData.role);
     setUserName(userData.name);
     setUserEmail(userData.email);
     setUserPicture(userData.picture);
@@ -112,67 +110,26 @@ export default function Header({ userData, setUserData }) {
           </div>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-3 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden">
+            <div className="absolute right-0 mt-3 w-56 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden">
               {loggedIn ? (
-                <>
-                  {/* Logout actions */}
-                  <div className="py-2">
-                    <MenuItem
-                      icon={<LogOut size={18} className="text-red-500" />}
-                      label="Logout"
-                      onClick={handleLogout}
-                      className="hover:bg-red-50"
-                    />
-                    <MenuItem
-                      icon={<LogOut size={18} className="text-orange-500" />}
-                      label="Logout all devices"
-                      onClick={handleLogoutAll}
-                      className="hover:bg-orange-50"
-                    />
-                  </div>
-
-                  <div className="mx-2 h-px bg-gray-200" />
-
-                  {/* Settings */}
-                  <div className="py-2">
-                    <MenuItem
-                      icon={<Settings size={18} className="text-blue-500" />}
-                      label="Settings"
-                      onClick={() => navigate("/setting")}
-                      className="hover:bg-blue-50"
-                    />
-                  </div>
-
-                  {(userRole === "Owner" ||
-                    userRole === "Admin" ||
-                    userRole === "Manager") && (
-                    <>
-                      <div className="mx-2 h-px bg-gray-200" />
-
-                      {/* Dashboard */}
-                      <div className="py-2">
-                        <MenuItem
-                          icon={
-                            <LayoutDashboard
-                              size={18}
-                              className="text-green-500"
-                            />
-                          }
-                          label="Dashboard"
-                          onClick={() => navigate("/users")}
-                          className="hover:bg-green-50"
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
+                <div className="py-2">
+                  <MenuItem
+                    icon={<LogOut size={18} className="text-red-500" />}
+                    label="Logout"
+                    onClick={handleLogout}
+                  />
+                  <MenuItem
+                    icon={<LogOut size={18} className="text-orange-500" />}
+                    label="Logout all devices"
+                    onClick={handleLogoutAll}
+                  />
+                </div>
               ) : (
                 <div className="py-2">
                   <MenuItem
-                    icon={<LogIn size={16} className="text-gray-700" />}
+                    icon={<LogIn size={16} />}
                     label="Login"
                     onClick={() => navigate("/login")}
-                    className="hover:bg-gray-100"
                   />
                 </div>
               )}

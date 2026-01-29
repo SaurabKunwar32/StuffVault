@@ -2,7 +2,7 @@ import { Navigate, Outlet } from "react-router-dom";
 
 export default function RoleRoute({ user, allowedRoles,loading }) {
   if (loading) {
-    return null; // or a spinner
+    return null;
   }
 
   if (!user) {

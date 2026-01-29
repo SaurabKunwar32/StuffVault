@@ -4,20 +4,19 @@ import { Link } from "react-router-dom";
 import { useDirectoryContext } from "../context/DirectoryContext";
 
 export default function DirectoryList() {
-    const {
+  const {
     items,
     errorMessage,
     showInLines,
-    progressMap,
     breadCrumb,
   } = useDirectoryContext();
-  // const breadcrumb=[{saurab},{fjsf}]
-  // console.log(breadCrumb);
-  // console.log(items.length);
+
   return (
-    <>
-      {/* Breadcrumb Bar */}
-      <div className="w-full bg-white/80 backdrop-blur border-b border-gray-200 px-6 py-2.5 sticky top-0 z-40">
+    //  FULL HEIGHT LAYOUT
+    <div className="flex flex-col h-screen bg-gray-50">
+
+      {/* ===== Breadcrumb Bar (Sticky) ===== */}
+      <div className="w-full bg-white/80 backdrop-blur border-b border-gray-200 px-6 py-2.5 sticky top-0 z-40 shrink-0">
         <div className="flex items-center gap-2 text-sm text-gray-600 overflow-x-auto whitespace-nowrap scrollbar-hide">
           {/* Home */}
           <Link
@@ -29,11 +28,10 @@ export default function DirectoryList() {
           </Link>
 
           {breadCrumb.map((item, index) => {
-            // console.log(item,index);
             const isLast = index === breadCrumb.length - 1;
+
             return (
               <div key={item._id} className="flex items-center gap-2">
-                {/* Separator */}
                 <ChevronRight size={14} className="text-gray-300" />
 
                 {isLast ? (
@@ -58,39 +56,36 @@ export default function DirectoryList() {
         </div>
       </div>
 
-      {items.length === 0 ? (
-        // Check if the error is specifically the "no access" error
-        errorMessage ===
-        "Directory not found or you do not have access to it!" ? (
-          <p className="mt-6 text-center text-lg font-bold text-red-700">
-            Directory not found or you do not have access to it!
-          </p>
-        ) : (
-          <p className="mt-6 text-center text-lg font-medium text-gray-400">
-            This folder is empty. Upload files or create a folder to see some
-            data.
-          </p>
-        )
-      ) : (
-        <div
-          className={
-            showInLines
-              ? "flex flex-col gap-2.5 mt-5"
-              : "grid gap-4 px-10 mt-5 grid-cols-[repeat(auto-fill,minmax(160px,1fr))]"
-          }
-        >
-          {items.map((item) => {
-            {/* const uploadProgress = progressMap[item.id] || 0; */}
+      {/* ===== SCROLLABLE CONTENT ===== */}
+      <div className="flex-1 overflow-y-auto px-6 pb-32">
 
-            return (
-              <DirectoryItem
-                key={item.id}
-                item={item}
-              />
-            );
-          })}
-        </div>
-      )}
-    </>
+        {items.length === 0 ? (
+          errorMessage ===
+          "Directory not found or you do not have access to it!" ? (
+            <p className="mt-6 text-center text-lg font-bold text-red-700">
+              Directory not found or you do not have access to it!
+            </p>
+          ) : (
+            <p className="mt-6 text-center text-lg font-medium text-gray-400">
+              This folder is empty. Upload files or create a folder to see some
+              data.
+            </p>
+          )
+        ) : (
+          <div
+            className={
+              showInLines
+                ? "flex flex-col gap-2.5 mt-5"
+                : "grid mt-5 gap-6 grid-cols-[repeat(auto-fill,minmax(160px,1fr))]"
+            }
+          >
+            {items.map((item) => (
+              <DirectoryItem key={item.id} item={item} />
+            ))}
+          </div>
+        )}
+
+      </div>
+    </div>
   );
 }

@@ -23,15 +23,15 @@ export default function DirectoryItem({ item }) {
     contextMenuPos,
     handleContextMenu,
     getFileIcon,
-    isUploading,
-    progressMap,
     handleCancelUpload,
     setDeleteItem,
     setShowDeleteModal,
     openRenameModal,
     openDetailsPopup,
     BASE_URL,
+    uploadMap,
   } = useDirectoryContext();
+  
   // Convert the file icon string to the actual Icon component
   function renderFileIcon(iconString) {
     switch (iconString) {
@@ -59,9 +59,10 @@ export default function DirectoryItem({ item }) {
   }
 
   const isUploadingItem = item.id.startsWith("temp-");
-  // console.log(isUploading);
-  // console.log(progressMap);
 
+  const isUploading = Object.values(uploadMap).some((item) => item.isUploading);
+
+  const upload = uploadMap[item.id];
   return (
     <div
       className={
@@ -101,10 +102,13 @@ export default function DirectoryItem({ item }) {
         />
       )}
 
-      {progressMap[item.id] !== undefined && (
+
+      {upload && (
         <UploadToast
           fileName={item.name}
-          progress={Math.floor(progressMap[item.id])}
+          progress={upload.progress}
+          uploadedBytes={upload.uploadedBytes}
+          totalBytes={upload.totalBytes}
           onCancel={() => handleCancelUpload(item.id)}
         />
       )}
