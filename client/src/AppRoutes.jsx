@@ -17,6 +17,8 @@ import ProtectedRoute from "./Routes/ProtectedRoute.jsx";
 import RoleRoute from "./Routes/RoleRoute.jsx";
 import { useLocation } from "react-router-dom";
 import Header from "./Component/Header.jsx";
+import Terms from "./LegalPages/Terms.jsx";
+import Privacy from "./LegalPages/Privacy.jsx";
 
 export default function AppRoutes() {
   const [userData, setUserData] = useState(null);
@@ -71,6 +73,8 @@ export default function AppRoutes() {
         <Route path="/login" element={<Login setUserData={setUserData} />} />
         <Route path="/register" element={<RegistrationForm />} />
         <Route path="/verify" element={<VerifyOtp />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/privacy" element={<Privacy />} />
       </Route>
 
       {/* PROTECTED ROUTES */}
@@ -97,7 +101,12 @@ export default function AppRoutes() {
           }
         />
 
-        <Route path="/subplans" element={<SubscriptionPlans userData={userData} setUserData={setUserData} />} />
+        <Route
+          path="/subplans"
+          element={
+            <SubscriptionPlans userData={userData} setUserData={setUserData} />
+          }
+        />
         <Route path="*" element={<InvalidRoute />} />
         <Route
           path="/setting"
@@ -114,7 +123,7 @@ export default function AppRoutes() {
             />
           }
         >
-          <Route path="/users" element={<UsersPage />} />
+          <Route path="/users" element={<UsersPage setUserData={setUserData} />} />
         </Route>
       </Route>
     </Routes>

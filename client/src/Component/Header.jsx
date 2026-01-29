@@ -35,6 +35,7 @@ export default function Header({ userData, setUserData }) {
     setUserRole(userData.role);
     setUserName(userData.name);
     setUserEmail(userData.email);
+    setUserPicture(userData.picture);
   }, [userData]);
 
   const handleLogout = async () => {
@@ -85,13 +86,18 @@ export default function Header({ userData, setUserData }) {
             onClick={() => setShowUserMenu((p) => !p)}
           >
             <div className="flex items-center gap-3 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center overflow-hidden">
                 {userPicture ? (
-                  <img src={userPicture} alt="user" className="w-full h-full" />
+                  <img
+                    src={userPicture}
+                    alt="user"
+                    className="w-full h-full rounded-full object-cover"
+                  />
                 ) : (
                   <User size={18} className="text-white" />
                 )}
               </div>
+
               <div className="min-w-0">
                 <div className="text-sm font-medium truncate">{userName}</div>
                 <div className="text-xs text-gray-500 truncate">
@@ -106,42 +112,69 @@ export default function Header({ userData, setUserData }) {
           </div>
 
           {showUserMenu && (
-            <div className="absolute right-0 mt-2 w-64 bg-white border rounded-xl shadow-lg z-50 overflow-hidden">
+            <div className="absolute right-0 mt-3 w-64 bg-white border border-gray-200 rounded-2xl shadow-xl z-50 overflow-hidden">
               {loggedIn ? (
                 <>
-                  <MenuItem
-                    icon={<LogOut size={18} className="text-red-500" />}
-                    label="Logout"
-                    onClick={handleLogout}
-                  />
-                  <MenuItem
-                    icon={<LogOut size={18} className="text-orange-500" />}
-                    label="Logout all devices"
-                    onClick={handleLogoutAll}
-                  />
-                  <MenuItem
-                    icon={<Settings size={18} className="text-blue-500" />}
-                    label="Settings"
-                    onClick={() => navigate("/setting")}
-                  />
+                  {/* Logout actions */}
+                  <div className="py-2">
+                    <MenuItem
+                      icon={<LogOut size={18} className="text-red-500" />}
+                      label="Logout"
+                      onClick={handleLogout}
+                      className="hover:bg-red-50"
+                    />
+                    <MenuItem
+                      icon={<LogOut size={18} className="text-orange-500" />}
+                      label="Logout all devices"
+                      onClick={handleLogoutAll}
+                      className="hover:bg-orange-50"
+                    />
+                  </div>
+
+                  <div className="mx-2 h-px bg-gray-200" />
+
+                  {/* Settings */}
+                  <div className="py-2">
+                    <MenuItem
+                      icon={<Settings size={18} className="text-blue-500" />}
+                      label="Settings"
+                      onClick={() => navigate("/setting")}
+                      className="hover:bg-blue-50"
+                    />
+                  </div>
+
                   {(userRole === "Owner" ||
                     userRole === "Admin" ||
                     userRole === "Manager") && (
-                    <MenuItem
-                      icon={
-                        <LayoutDashboard size={18} className="text-green-500" />
-                      }
-                      label="Dashboard"
-                      onClick={() => navigate("/users")}
-                    />
+                    <>
+                      <div className="mx-2 h-px bg-gray-200" />
+
+                      {/* Dashboard */}
+                      <div className="py-2">
+                        <MenuItem
+                          icon={
+                            <LayoutDashboard
+                              size={18}
+                              className="text-green-500"
+                            />
+                          }
+                          label="Dashboard"
+                          onClick={() => navigate("/users")}
+                          className="hover:bg-green-50"
+                        />
+                      </div>
+                    </>
                   )}
                 </>
               ) : (
-                <MenuItem
-                  icon={<LogIn size={16} />}
-                  label="Login"
-                  onClick={() => navigate("/login")}
-                />
+                <div className="py-2">
+                  <MenuItem
+                    icon={<LogIn size={16} className="text-gray-700" />}
+                    label="Login"
+                    onClick={() => navigate("/login")}
+                    className="hover:bg-gray-100"
+                  />
+                </div>
               )}
             </div>
           )}

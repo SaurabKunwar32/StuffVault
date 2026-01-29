@@ -1,4 +1,5 @@
 import { Cloud } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Footer() {
   return (
@@ -71,23 +72,35 @@ export default function Footer() {
           {/* Legal */}
           <div>
             <h4 className="text-sm font-semibold text-gray-900">Legal</h4>
+
             <ul className="mt-4 space-y-3 text-sm text-gray-600">
-              {["Privacy Policy", "Terms of Service"].map((item) => (
-                <li
-                  key={item}
+              <li>
+                <Link
+                  to="/privacy"
                   className="cursor-pointer hover:text-gray-900 transition"
                 >
-                  {item}
-                </li>
-              ))}
+                  Privacy Policy
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/terms"
+                  className="cursor-pointer hover:text-gray-900 transition"
+                >
+                  Terms of Service
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* CTA */}
           <div className="flex items-start sm:items-end lg:items-center">
-            <button className="w-full rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-              Get Started
-            </button>
+            <Link to={"/register"}>
+              <button className="w-full rounded-full cursor-pointer bg-blue-600 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                Get Started
+              </button>
+            </Link>
           </div>
         </div>
 

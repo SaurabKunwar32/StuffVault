@@ -258,14 +258,25 @@ export default function UsersPage({ setUserData }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 via-gray-50 to-gray-200">
+    <div className="min-h-screen bg-gray-50">
       {/* Top Bar */}
-      <header className="w-full bg-white shadow-sm py-4 px-6 flex justify-between items-center">
+      <header className="w-full bg-white border-b border-gray-200 py-4 px-6 flex justify-between items-center">
         <button
-          onClick={() => navigate("/app")}
-          className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition"
+          onClick={() => window.history.back()}
+          className="
+    inline-flex items-center gap-2
+    rounded-xl px-4 py-2
+    bg-gradient-to-r from-indigo-500 to-indigo-600
+    text-sm font-medium text-white
+    shadow-md shadow-indigo-500/30
+    hover:from-indigo-600 hover:to-indigo-700
+    hover:shadow-lg hover:shadow-indigo-600/30
+    active:scale-95
+    transition-all duration-200 ease-out
+    focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2
+  "
         >
-          <ArrowLeft className="w-4 h-4" /> Back
+          ← Back
         </button>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-3">
@@ -463,22 +474,6 @@ export default function UsersPage({ setUserData }) {
                       )}
                     </td>
 
-                    {/* <td className="py-4 px-5 text-center">
-                      <select
-                        value={user.role}
-                        onChange={(e) =>
-                          updateUserRole(user.id, e.target.value)
-                        }
-                        className="px-3 py-1 rounded-full border border-gray-300 bg-white text-sm font-semibold cursor-pointer hover:bg-gray-100"
-                      >
-                        {" "}
-                        <option value="Admin">Admin</option>{" "}
-                        <option value="Owner">Owner</option>{" "}
-                        <option value="Manager">Manager</option>{" "}
-                        <option value="User">User</option>{" "}
-                      </select>{" "}
-                    </td> */}
-
                     <td className="py-4 px-5">
                       <div className="flex justify-center items-center">
                         <button
@@ -618,3 +613,86 @@ export default function UsersPage({ setUserData }) {
     </div>
   );
 }
+
+
+{/* <div className="space-y-4 md:hidden">
+  {users.map((user) => (
+    <div
+      key={user.id}
+      className="rounded-xl border border-gray-200 p-4 bg-white shadow-sm"
+    >
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className="font-semibold text-gray-900">{user.name}</h3>
+          <p className="text-sm text-gray-600">{user.email}</p>
+        </div>
+
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+            user.isLoggedIn
+              ? "bg-green-100 text-green-700"
+              : "bg-gray-200 text-gray-600"
+          }`}
+        >
+          {user.isLoggedIn ? "Online" : "Offline"}
+        </span>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
+        <span className="text-sm font-medium text-gray-700">
+          Role:
+        </span>
+
+        {userRole === "Admin" || userRole === "Owner" ? (
+          <select
+            value={user.role}
+            onChange={(e) => updateUserRole(user.id, e.target.value)}
+            className="rounded-full px-3 py-1 text-sm font-semibold border"
+          >
+            <option>Admin</option>
+            <option>Owner</option>
+            <option>Manager</option>
+            <option>User</option>
+          </select>
+        ) : (
+          <span className="px-3 py-1 rounded-full bg-gray-100 text-sm font-semibold">
+            {user.role}
+          </span>
+        )}
+      </div>
+
+      <div className="mt-4 flex gap-3">
+        <button
+          disabled={!user.isLoggedIn}
+          onClick={() =>
+            setConfirmModal({ isOpen: true, type: "logout", user })
+          }
+          className={`flex-1 py-2 rounded-lg text-sm font-medium ${
+            user.isLoggedIn
+              ? "bg-yellow-500 text-white"
+              : "bg-gray-300 text-gray-500 cursor-not-allowed"
+          }`}
+        >
+          Logout
+        </button>
+
+        {(userRole === "Admin" || userRole === "Owner") && (
+          <button
+            disabled={userEmail === user.email}
+            onClick={() =>
+              setConfirmModal({ isOpen: true, type: "delete", user })
+            }
+            className={`flex-1 py-2 rounded-lg text-sm font-medium ${
+              userEmail === user.email
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            Delete
+          </button>
+        )}
+      </div>
+    </div>
+  ))}
+</div> */}
+  

@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleLogin } from "@react-oauth/google";
-import { Github, Cloud, Lock } from "lucide-react";
+import { Github, Cloud } from "lucide-react";
 import { loginWithGithub } from "../apis/loginWithGithub.js";
 import { loginWithGoogle } from "../apis/loginWithGoogle.js";
-import { loginUser } from "../apis/userApi.js";
-import { fetchUser } from "../apis/userApi.js";
+import { loginUser, fetchUser } from "../apis/userApi.js";
 
 export default function Login({ setUserData }) {
   useEffect(() => {
@@ -17,32 +16,25 @@ export default function Login({ setUserData }) {
     password: "abcd",
   });
 
-  // serverError will hold the error message from the server
   const [serverError, setServerError] = useState("");
-
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    if (serverError) setServerError(""); // clear error when typing
+    if (serverError) setServerError("");
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       const data = await loginUser(formData);
-
       if (data.error) {
         setServerError(data.error);
         return;
       }
-
-      // 🔑 SYNC COOKIE SESSION → REACT STATE
       const user = await fetchUser();
       setUserData(user);
-
       navigate("/app", { replace: true });
     } catch (error) {
       setServerError(
@@ -52,10 +44,8 @@ export default function Login({ setUserData }) {
     }
   };
 
-  // If there's an error, we'll add "input-error" class to both fields
   const hasError = Boolean(serverError);
 
-  // Auto-hide toast after 4 seconds
   useEffect(() => {
     if (serverError) {
       const timer = setTimeout(() => setServerError(""), 4000);
@@ -64,129 +54,85 @@ export default function Login({ setUserData }) {
   }, [serverError]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
-      {/*  Toast Notification */}
+    <div className="h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-indigo-100 to-purple-100 px-4 py-6 overflow-hidden">
+      {/* Toast */}
       {serverError && (
-        <div className="fixed top-5 right-5 z-50 w-80 max-w-xs bg-red-600 text-white px-5 py-3 rounded-lg shadow-lg flex items-start space-x-3 animate-slideIn">
-          {/* Icon */}
-          <div className="flex-shrink-0 mt-0.5">
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M18.364 5.636l-12.728 12.728M5.636 5.636l12.728 12.728"
-              />
-            </svg>
-          </div>
-          {/* Message */}
-          <div className="flex-1 text-sm font-medium">{serverError}</div>
+        <div className="fixed top-5 right-5 z-50 w-80 bg-red-600 text-white px-5 py-3 rounded-lg shadow-lg">
+          <p className="text-sm font-medium">{serverError}</p>
         </div>
       )}
 
-      <div className="max-w-md w-full bg-white p-10 rounded-2xl shadow-xl space-y-6 transition-all duration-300">
-        <div className="mb-8 flex flex-col items-center">
-          {/* Brand */}
+      <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl space-y-5">
+        {/* Header */}
+        <div className="flex flex-col items-center mb-4">
           <div className="flex items-center gap-3">
             <div className="flex h-13 w-13 items-center justify-center rounded-2xl bg-blue-500">
               <Cloud size={28} strokeWidth={1.2} className="text-white" />
             </div>
-
             <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
               Stuff<span className="text-gray-500">Vault</span>
             </h2>
           </div>
-
-          {/* Subtitle */}
-          <p className="mt-2 text-l text-gray-500 text-center">
-            Sign in to continue to your storage
+          <p className="mt-2 text-sm text-gray-500 text-center">
+            Sign in to continue
           </p>
         </div>
 
-        {/* <div className="flex justify-center items-center mb-6">
-                    <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white font-semibold">1</div>
-                    <div className="w-16 h-1 bg-gray-200 mx-2 rounded"></div>
-                    <div className="w-8 h-8 border border-gray-400 rounded-full flex items-center justify-center text-black font-semibold">
-                        2
-                    </div>
-                </div> */}
-
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        {/* Form */}
+        <form className="space-y-5" onSubmit={handleSubmit}>
           {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Email Address
             </label>
-            <div className="relative">
-              <input
-                onChange={handleChange}
-                value={formData.email}
-                type="email"
-                id="email"
-                name="email"
-                placeholder="you@example.com"
-                className={`w-full px-4 py-3 pl-11 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ${hasError ? "input-error" : ""}`}
-                required
-              />
-              <div className="absolute left-3 top-3.5 text-gray-400">📧</div>
-            </div>
+            <input
+              onChange={handleChange}
+              // value={formData.email}
+              placeholder="test@email.com"
+              type="email"
+              name="email"
+              className={`w-full px-4 py-3 border rounded-xl shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-indigo-500
+        ${hasError ? "border-red-500" : "border-gray-300"}`}
+              required
+            />
           </div>
 
           {/* Password */}
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
-            <div className="relative">
-              <input
-                onChange={handleChange}
-                value={formData.password}
-                type="password"
-                id="password"
-                name="password"
-                placeholder="••••••••"
-                className={`w-full px-4 py-3 pl-11 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 ${hasError ? "input-error" : ""}`}
-                required
-              />
-              <div className="absolute left-3 top-3.5 text-gray-400">🔒</div>
-            </div>
-
-            {/* Example error message */}
-            {serverError && (
-              <span className="text-sm text-red-500 mt-2 block">
-                {serverError}
-              </span>
-            )}
+            <input
+              onChange={handleChange}
+              // value={formData.password}
+              placeholder="********"
+              type="password"
+              name="password"
+              className={`w-full px-4 py-3 border rounded-xl shadow-sm
+        focus:outline-none focus:ring-2 focus:ring-indigo-500
+        ${hasError ? "border-red-500" : "border-gray-300"}`}
+              required
+            />
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
-            className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 shadow-md transition duration-200"
+            className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition"
           >
             Login
           </button>
         </form>
 
-        {/* Register Link */}
+        {/* Register */}
         <p className="text-center text-sm text-gray-600">
-          Don't have an account?{" "}
+          Don't have an account?
           <Link
             to="/register"
             className="text-indigo-600 font-medium hover:underline"
           >
-            Register
+            &nbsp;Register
           </Link>
         </p>
 
@@ -197,7 +143,8 @@ export default function Login({ setUserData }) {
           <div className="h-px flex-1 bg-gray-300" />
         </div>
 
-        <div className="flex justify-center items-center">
+        {/* Social Login */}
+        <div className="flex justify-center">
           <GoogleLogin
             onSuccess={async (credentialResponse) => {
               try {
@@ -210,29 +157,43 @@ export default function Login({ setUserData }) {
                 }
                 const user = await fetchUser();
                 setUserData(user);
-
                 navigate("/app", { replace: true });
               } catch (err) {
-                // console.error("Login error:", err);
-                setServerError(err.response.data.error);
+                setServerError(err.response?.data?.error);
               }
             }}
-            onError={() =>
-              console.log("Google Login failed or user dismissed One Tap")
-            }
+            onError={() => console.log("Google Login failed")}
             useOneTap
           />
         </div>
 
-        <div className="flex justify-center mt-6">
+        <div className="flex justify-center mt-4">
           <button
             onClick={loginWithGithub}
-            className="flex items-center justify-center gap-2 py-2 px-4 bg-[#24292f] text-white rounded-lg hover:bg-[#1b1f23] transition-colors"
+            className="w-[300px] h-[44px]  cursor-pointer flex items-center justify-center gap-2 bg-[#24292f] text-white rounded-md hover:bg-[#1b1f23] transition-colors"
           >
-            <Github size={20} />
-            <span>Continue with GitHub</span>
+            <Github size={18} />
+            <span className="text-sm font-medium">Continue with GitHub</span>
           </button>
         </div>
+
+        <p className="mt-4 text-xs text-center text-gray-500 leading-relaxed">
+          By continuing, you agree to our{" "}
+          <Link
+            to="/terms"
+            className="text-indigo-600 hover:underline font-medium"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            to="/privacy"
+            className="text-indigo-600 hover:underline font-medium"
+          >
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
     </div>
   );

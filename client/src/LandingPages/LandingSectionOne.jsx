@@ -93,7 +93,7 @@ export default function LandingSectionOne() {
             to={"/register"}
             className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium text-white hover:bg-blue-700 transition"
           >
-            Start using Stuff Vault
+            Get Started
             <ArrowRight className="h-4 w-4" />
           </Link>
 
@@ -125,7 +125,7 @@ export default function LandingSectionOne() {
               {/* title */}
               <div className="mx-auto">
                 <span className="text-sm text-slate-500 bg-slate-100 px-4 py-1 rounded-full">
-                  app.stuffvault
+                  app.stuffvault.com.np
                 </span>
               </div>
             </div>
