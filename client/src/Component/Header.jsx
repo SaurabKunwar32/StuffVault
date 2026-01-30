@@ -65,7 +65,7 @@ export default function Header({ userData, setUserData }) {
   }, []);
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 h-16 flex items-center  ">
+    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 px-6 h-16 flex items-center">
       <div className="flex justify-between items-center w-full  max-w-[1540px] mx-auto">
         {/* LOGO */}
         <Link to={userData ? "/app" : "/"} className="flex items-center gap-3">

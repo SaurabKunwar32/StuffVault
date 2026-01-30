@@ -5,8 +5,9 @@ import { Cloud, Github } from "lucide-react";
 import { loginWithGoogle } from "../apis/loginWithGoogle.js";
 import { loginWithGithub } from "../apis/loginWithGithub.js";
 import { sendOtp } from "../apis/authApi.js";
+import { fetchUser } from "../apis/userApi.js";
 
-export default function Register() {
+export default function Register({ setUserData }) {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -176,7 +177,8 @@ export default function Register() {
                   setServerError(data.error);
                   return;
                 }
-                navigate("/app", { replace: true });
+                const user = await fetchUser();
+                setUserData(user);
               } catch (err) {
                 setServerError(err.response?.data?.error);
               }
