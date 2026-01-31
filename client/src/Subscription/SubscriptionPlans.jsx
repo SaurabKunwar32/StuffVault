@@ -5,7 +5,7 @@ import Header from "../Component/Header.jsx";
 const SUBSCRIPTION_DATA = {
   monthly: [
     {
-      id: "price_month_starter",
+      id: "price_1Sq7LfHAoQrcVPyXdEdJDrZlq",
       name: "Starter",
       tagline: "Great for individuals",
       storage: "2 TB",
@@ -21,7 +21,7 @@ const SUBSCRIPTION_DATA = {
       popular: false,
     },
     {
-      id: "price_month_pro",
+      id: "price_1Sq7LfHAoQrcVPyXdEdJDrZl",
       name: "Pro",
       tagline: "For creators & devs",
       storage: "5 TB",
@@ -37,7 +37,7 @@ const SUBSCRIPTION_DATA = {
       popular: true,
     },
     {
-      id: "price_month_ultimate",
+      id: "price_1Sq7LzHAoQrcVPyXMmh3W4PE",
       name: "Ultimate",
       tagline: "Teams & power users",
       storage: "10 TB",
@@ -116,7 +116,7 @@ export default function SubscriptionPlans({ setUserData, userData }) {
 
   return (
     <>
-      <section id="plans" className="scroll-mt-24">
+      <section id="plans" className="scroll-mt-24 ">
         <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white max-w-[1540px] mx-auto">
           {/* GLOBAL HEADER */}
           {userData ? (
@@ -168,7 +168,7 @@ export default function SubscriptionPlans({ setUserData, userData }) {
             <section className="mt-14">
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {SUBSCRIPTION_DATA[mode].map((plan) => (
-                  <SubscriptionCards key={plan.id} plan={plan} />
+                  <SubscriptionCards key={plan.id} plan={plan} currentUserData={userData} />
                 ))}
               </div>
             </section>

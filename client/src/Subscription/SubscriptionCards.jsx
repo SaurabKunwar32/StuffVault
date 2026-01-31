@@ -11,42 +11,58 @@ function Price({ value }) {
   );
 }
 
-export default function SubscriptionCards({ plan }) {
+export default function SubscriptionCards({ plan, currentUserData }) {
   const [subId, setSubId] = useState("");
+
+  // console.log(currentUserData);
 
   const handleClick = (plan) => {
     setSubId(plan.id);
-    console.log(plan);
+    // console.log(plan.id);
   };
 
   const [userData, setUserData] = useState({
-    name: "saurab",
-    mobile: "9876543210",
+    name: "",
+    email: "",
   });
 
-  // useEffect(() => {
-  //   if (!subId) return;
+  useEffect(() => {
+    if (currentUserData) {
+      setUserData({
+        name: currentUserData.name,
+        email: currentUserData.email,
+      });
+    }
+  }, [currentUserData]);
 
-  //   const fetchSubs = async () => {
-  //     try {
-  //       const response = await fetch("http://localhost:4000/subscription", {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ subId, userData }),
-  //       });
+  useEffect(() => {
+    if (!subId) return;
 
-  //       const { checkoutUrl } = await response.json();
-  //       window.location.href = checkoutUrl;
-  //       console.log(data);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
+    const updateSubscription = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:3000/billing/subscription",
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "Content-Type": "application/json",
+            },
 
-  //   fetchSubs();
-  // }, [subId]);
+            body: JSON.stringify({ subId, userData }),
+          },
+        );
+
+        const { checkoutUrl } = await response.json();
+        window.location.href = checkoutUrl;
+        console.log(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    updateSubscription();
+  }, [subId]);
 
   return (
     <div

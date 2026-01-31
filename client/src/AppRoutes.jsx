@@ -18,6 +18,7 @@ import RoleRoute from "./Routes/RoleRoute.jsx";
 import { useLocation } from "react-router-dom";
 import Terms from "./LegalPages/Terms.jsx";
 import Privacy from "./LegalPages/Privacy.jsx";
+import Success from "./Subscription/success.jsx";
 
 export default function AppRoutes() {
   const [userData, setUserData] = useState(null);
@@ -31,6 +32,7 @@ export default function AppRoutes() {
     "/users",
     "/setting",
     "/subplans",
+    "/success",
   ];
 
   // Only fetch user if the route is protected
@@ -70,7 +72,10 @@ export default function AppRoutes() {
       {/* PUBLIC ROUTES */}
       <Route element={<PublicRoute user={userData} loading={loading} />}>
         <Route path="/login" element={<Login setUserData={setUserData} />} />
-        <Route path="/register" element={<RegistrationForm setUserData={setUserData}  />} />
+        <Route
+          path="/register"
+          element={<RegistrationForm setUserData={setUserData} />}
+        />
         <Route path="/verify" element={<VerifyOtp />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
@@ -106,6 +111,8 @@ export default function AppRoutes() {
             <SubscriptionPlans userData={userData} setUserData={setUserData} />
           }
         />
+        <Route path="/success" element={<Success />} />
+
         <Route path="*" element={<InvalidRoute />} />
         <Route
           path="/setting"
@@ -122,7 +129,10 @@ export default function AppRoutes() {
             />
           }
         >
-          <Route path="/users" element={<UsersPage setUserData={setUserData} />} />
+          <Route
+            path="/users"
+            element={<UsersPage setUserData={setUserData} />}
+          />
         </Route>
       </Route>
     </Routes>
