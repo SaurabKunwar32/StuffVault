@@ -44,19 +44,39 @@ const userSchema = new Schema(
     authProvider: {
       type: String,
       enum: ["local", "google", "github"],
-      default: "local"
+      default: "local",
     },
     maxStorageInBytes: {
       type: Number,
       required: true,
       default: 1 * 1024 ** 3,
-    }
+    },
+    Plan: {
+      type: String,
+      required: true,
+      enum: ["Free", "Basic", "Starter", "Pro"],
+      default: "Free",
+    },
+    subscriptionStatus: {
+      type: String,
+      enum: ["inactive", "pending", "active", "past_due", "canceled"],
+      default: "inactive",
+      required: true,
+    },
+    planStartedAt: {
+      type: Date,
+      default: null,
+    },
+
+    planExpiresAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     strict: "throw",
-  }
+  },
 );
-
 
 // Hash password before save
 userSchema.pre("save", async function (next) {
@@ -64,7 +84,6 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 12);
   next();
 });
-
 
 // Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
