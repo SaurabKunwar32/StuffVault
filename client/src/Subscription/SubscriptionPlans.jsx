@@ -5,11 +5,11 @@ import Header from "../Component/Header.jsx";
 const SUBSCRIPTION_DATA = {
   monthly: [
     {
-      id: "price_1Sq7LfHAoQrcVPyXdEdJDrZlq",
+      id: "price_1SwjPWHAoQrcVPyXPHjqSZSp",
       name: "Starter",
       tagline: "Great for individuals",
-      storage: "2 TB",
-      price: 199,
+      storage: "8 GB",
+      price: 10,
       period: "/mo",
       cta: "Choose Starter",
       features: [
@@ -21,11 +21,11 @@ const SUBSCRIPTION_DATA = {
       popular: false,
     },
     {
-      id: "price_1Sq7LfHAoQrcVPyXdEdJDrZl",
+      id: "price_1SwjQ1HAoQrcVPyXjk1WRU8I",
       name: "Pro",
       tagline: "For creators & devs",
-      storage: "5 TB",
-      price: 399,
+      storage: "20 GB",
+      price: 50,
       period: "/mo",
       cta: "Choose Pro",
       features: [
@@ -37,11 +37,11 @@ const SUBSCRIPTION_DATA = {
       popular: true,
     },
     {
-      id: "price_1Sq7LzHAoQrcVPyXMmh3W4PE",
+      id: "price_1SwjQDHAoQrcVPyXZahavaw0",
       name: "Ultimate",
       tagline: "Teams & power users",
-      storage: "10 TB",
-      price: 699,
+      storage: "50 GB",
+      price: 70,
       period: "/mo",
       cta: "Choose Ultimate",
       features: [
@@ -56,11 +56,11 @@ const SUBSCRIPTION_DATA = {
 
   yearly: [
     {
-      id: "price_year_starter",
+      id: "price_1SwjQfHAoQrcVPyXzzBkMqtQ",
       name: "Starter",
       tagline: "Best value for individuals",
-      storage: "2 TB",
-      price: 1999,
+      storage: "1 TB",
+      price: 100,
       period: "/yr",
       cta: "Choose Starter",
       features: [
@@ -73,11 +73,11 @@ const SUBSCRIPTION_DATA = {
       popular: false,
     },
     {
-      id: "price_year_pro",
+      id: "price_1SwjQoHAoQrcVPyXUHcMnWuV",
       name: "Pro",
       tagline: "Serious creators & professionals",
-      storage: "5 TB",
-      price: 3999,
+      storage: "2.2 TB",
+      price: 150,
       period: "/yr",
       cta: "Choose Pro",
       features: [
@@ -90,11 +90,11 @@ const SUBSCRIPTION_DATA = {
       popular: true,
     },
     {
-      id: "price_year_ultimate",
+      id: "price_1SwjQxHAoQrcVPyXM89OHiR6",
       name: "Ultimate",
       tagline: "Long-term teams & businesses",
-      storage: "10 TB",
-      price: 6999,
+      storage: "5 TB",
+      price: 180,
       period: "/yr",
       cta: "Choose Ultimate",
       features: [

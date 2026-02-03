@@ -1,6 +1,6 @@
 # StuffVault
 
-A full-stack **cloud storage application** that allows users to upload, manage, and share their files securely.
+A full-stack **cloud storage application** that allows users to upload and manage their files securely.
 
 The **client** is built with **React**, **Vite**, and **TailwindCSS**, while the **server** uses **Node.js**, **Express**, **MongoDB**, and **Redis**.
 
@@ -28,8 +28,6 @@ The application stores files using **AWS S3** for seamless file transfers.
 
 - [Tech Stack](#tech-stack)
 
-
-
 ---
 
 ## Features
@@ -50,7 +48,7 @@ The application stores files using **AWS S3** for seamless file transfers.
 - **Cloud storage with AWS S3** for scalable and reliable file storage.
 - Supports **Grid and List views** for file navigation.
 - View file details (size, type, created date, modified date).
-- Rename, delete and recover files.
+- Rename and delete files.
 
 ### Cloud Storage and Import
 
@@ -67,10 +65,9 @@ The application stores files using **AWS S3** for seamless file transfers.
 ### Admin Dashboard
 
 - User Overview - Track total, active, online, and deleted users.
-- User Management - View, filter, edit roles, force logout, and delete users.
+- User Management - View, edit roles, force logout, and delete users.
 - Deletion System - Soft Delete (recoverable) and Hard Delete (permanent) with confirmation.
 - Role and Permissions - Roles like User, Manager, Admin, Owner with badges.
-- File Management - Access directories/files with navigation.
 - Real-Time Tracking - Monitor online users and refresh instantly.
 
 ## Project Structure
@@ -158,45 +155,47 @@ Client/
 ```bash
 server/
 ├── config/
-│   ├── db.js                    # Database connection setup
-│   ├── redis.js                 # Redis client configuration
-│   └── setup.js                 # Application-level setup/config
+│   ├── db.js
+│   ├── redis.js
+│   └── setup.js
 ├── controllers/
-│   ├── authController.js        # Authentication logic
-│   ├── directoryController.js   # Directory-related operations
-│   ├── fileController.js        # File upload/download logic
-│   └── userController.js        # User-related operations
+│   ├── authController.js
+│   ├── billingController.js
+│   ├── directoryController.js
+│   ├── fileController.js
+│   └── userController.js
 ├── middlewares/
-│   ├── auth.js                  # Authentication middleware
-│   └── validatedMiddleware.js   # Request validation handler
+│   ├── auth.js
+│   └── validateIdMiddleware.js
 ├── models/
-│   ├── directoryModel.js        # Directory schema/model
-│   ├── fileModel.js             # File schema/model
-│   ├── otpModel.js              # OTP schema/model
-│   ├── sessionModel.js          # Session schema/model
-│   └── userModel.js             # User schema/model
+│   ├── directoryModel.js
+│   ├── fileModel.js
+│   ├── otpModel.js
+│   ├── sessionModel.js
+│   └── userModel.js
 ├── node_modules/
 ├── routes/
-│   ├── authRoutes.js            # Auth route definitions
-│   ├── directoryRoutes.js       # Directory route definitions
-│   ├── fileRoutes.js            # File route definitions
-│   └── userRoutes.js            # User route definitions
+│   ├── authRoutes.js
+│   ├── billingRoutes.js
+│   ├── directoryRoutes.js
+│   ├── fileRoutes.js
+│   └── userRoutes.js
 ├── services/
-│   ├── cloudFont.js             # Cloud storage integration
-│   ├── googleAuthService.js     # Google OAuth service
-│   ├── s3.js                    # AWS S3 service wrapper
-│   └── sendOtpService.js        # OTP delivery service
+│   ├── cloudFront.js
+│   ├── googleAuthService.js
+│   ├── s3.js
+│   └── sendOtpService.js
 ├── utils/
-│   ├── logicalPath.js           # Path resolution helpers
-│   ├── RateLimiter.js           # Rate limiting utility
-│   ├── sanitize.js              # Input sanitization helpers
-│   ├── throttler.js             # Request throttling utility
-│   └── updateDirectoriesSize.js # Directory size recalculation
+│   ├── logicalPath.js
+│   ├── RateLimiter.js
+│   ├── sanitize.js
+│   ├── throttler.js
+│   └── updateDirectoriesSize.js
 ├── validators/
-│   └── authSchema.js            # Request validation schemas
+│   └── authSchema.js
 ├── .env
 ├── .gitignore
-├── app.js                       # Express app entry point
+├── app.js
 ├── package-lock.json
 └── package.json
 
@@ -222,6 +221,7 @@ server/
   <img src="assests/logouts.png" alt="Logout  Buttons" width="45%" />
   <img src="assests/Details.png" alt="Detail Modal" width="45%" />
   <img src="assests/newDir.png" alt="New Directory" width="45%" />
+  <img src="assests/breadcrump.png" alt="BreadCrump" width="45%" />
 </p>
 
 ---
@@ -229,10 +229,15 @@ server/
 ### Settings
 
 <p align="center">
-  <img src="assests/setting.png" alt="Settings 1" width="45%" />
-  <!-- <img src="docs/ScreenShots/Settings/Settings-2.png" alt="Settings 2" width="45%" />
-  <img src="docs/ScreenShots/Settings/Settings-3.png" alt="Settings 3" width="45%" />
-  <img src="docs/ScreenShots/Settings/Settings-4.png" alt="Settings 4" width="45%" /> -->
+  <img src="assests/setting.png" alt="Settings" width="45%" />
+</p>
+
+---
+
+### Subscription
+
+<p align="center">
+  <img src="assests/subscription.png" alt="Subscriptio " width="45%" />
 </p>
 
 ---
@@ -241,9 +246,6 @@ server/
 
 <p align="center">
   <img src="assests/dashboard.png" alt="Dashboard" width="45%" />
-  <!-- <img src="docs/ScreenShots/Admin/Online-User.png" alt="Online Users" width="45%" />
-  <img src="docs/ScreenShots/Admin/Hard-Soft Delete.png" alt="Hard-soft-delete" width="45%" /> -->
-  <!-- <img src="docs/ScreenShots/Admin/Single User view.png" alt="View Directory" width="45%" /> -->
 </p>
 
 ---
@@ -258,5 +260,3 @@ server/
 - **Authentication**: Bcrypt + OTP + OAuth (Google/GitHub)
 
 ---
-
-

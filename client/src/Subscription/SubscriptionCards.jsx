@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 function Price({ value }) {
   return (
     <div className="flex items-baseline gap-1">
-      <span className="text-lg font-semibold text-slate-700">₹</span>
+      <span className="text-2xl font-semibold text-slate-700">$</span>
       <span className="text-4xl font-bold tracking-tight text-slate-900">
         {value}
       </span>

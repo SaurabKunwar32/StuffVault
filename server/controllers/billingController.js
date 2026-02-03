@@ -1,6 +1,4 @@
 import User from "../models/userModel.js";
-import mongoose, { Types } from "mongoose";
-import Directory from "../models/directoryModel.js";
 import Stripe from "stripe";
 
 const stripe = new Stripe(
@@ -8,27 +6,65 @@ const stripe = new Stripe(
 );
 
 const PLANS = {
-  BASIC_3_MONTHS: {
-    plan: "Pro",
-    planId: "price_1Sq7LfHAoQrcVPyXdEdJDrZl",
-    interval: "3_months",
-    addStorageBytes: 10 * 1024 * 1024 * 1024,
+  MONTHLY: {
+    STARTER: {
+      plan: "Starter",
+      planId: "price_1SwjPWHAoQrcVPyXPHjqSZSp",
+      interval: "monthly",
+      addStorageBytes: 8 * 1024 * 1024 * 1024, // 8 GB
+    },
+
+    PRO: {
+      plan: "Pro",
+      planId: "price_1SwjQ1HAoQrcVPyXjk1WRU8I",
+      interval: "monthly",
+      addStorageBytes: 20 * 1024 * 1024 * 1024, // 20 GB
+    },
+
+    ULTIMATE: {
+      plan: "Ultimate",
+      planId: "price_1SwjQDHAoQrcVPyXZahavaw0",
+      interval: "monthly",
+      addStorageBytes: 50 * 1024 * 1024 * 1024, // 50 GB
+    },
   },
 
-  BASIC_6_MONTHLY: {
-    plan: "Ultimate",
-    planId: "price_1Sq7LzHAoQrcVPyXMmh3W4PE",
-    interval: "6_month",
-    addStorageBytes: 200 * 1024 * 1024 * 1024,
+  YEARLY: {
+    STARTER: {
+      plan: "Starter",
+      planId: "price_1SwjQfHAoQrcVPyXzzBkMqtQ",
+      interval: "yearly",
+      addStorageBytes: 1 * 1024 * 1024 * 1024 * 1024, // 1 TB
+    },
+
+    PRO: {
+      plan: "Pro",
+      planId: "price_1SwjQoHAoQrcVPyXUHcMnWuV",
+      interval: "yearly",
+      addStorageBytes: 2.2 * 1024 * 1024 * 1024 * 1024, // 2.2 TB
+    },
+
+    ULTIMATE: {
+      plan: "Ultimate",
+      planId: "price_1SwjQxHAoQrcVPyXM89OHiR6",
+      interval: "yearly",
+      addStorageBytes: 5 * 1024 * 1024 * 1024 * 1024, // 5 TB
+    },
   },
 };
 
-const PLAN_ID_MAP = Object.values(PLANS).reduce((acc, plan) => {
-  acc[plan.planId] = plan;
+const PLAN_ID_MAP = Object.values(PLANS).reduce((acc, billingGroup) => {
+  Object.values(billingGroup).forEach((plan) => {
+    acc[plan.planId] = plan;
+  });
   return acc;
 }, {});
 
 export const updateSubscription = async (req, res) => {
+  // console.log(req.body);
+  // console.log(req.body.userData);
+  // console.log("PLAN_ID_MAP keys:", Object.keys(PLAN_ID_MAP));
+
   try {
     const { subId } = req.body; // Stripe priceId
     const { name, email } = req.body.userData;
