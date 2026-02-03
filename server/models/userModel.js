@@ -1,6 +1,5 @@
 import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
-import { required } from "zod/mini";
 
 const userSchema = new Schema(
   {
@@ -51,24 +50,34 @@ const userSchema = new Schema(
       required: true,
       default: 1 * 1024 ** 3,
     },
-    Plan: {
+    stripeCustomerId: {
       type: String,
-      required: true,
+      default: null, // not required until checkout
+    },
+
+    stripeSubscriptionId: {
+      type: String,
+      default: null, // not required until checkout
+    },
+
+    subscriptionPlan: {
+      type: String,
       enum: ["Free", "Basic", "Starter", "Pro"],
       default: "Free",
     },
+
     subscriptionStatus: {
       type: String,
       enum: ["inactive", "pending", "active", "past_due", "canceled"],
       default: "inactive",
-      required: true,
     },
-    planStartedAt: {
+
+    subscriptionStartedAt: {
       type: Date,
       default: null,
     },
 
-    planExpiresAt: {
+    subscriptionExpiresAt: {
       type: Date,
       default: null,
     },

@@ -15,10 +15,10 @@ const PLANS = {
     addStorageBytes: 10 * 1024 * 1024 * 1024,
   },
 
-  BASIC_MONTHLY: {
+  BASIC_6_MONTHLY: {
     plan: "Ultimate",
     planId: "price_1Sq7LzHAoQrcVPyXMmh3W4PE",
-    interval: "month",
+    interval: "6_month",
     addStorageBytes: 200 * 1024 * 1024 * 1024,
   },
 };
@@ -33,18 +33,21 @@ export const updateSubscription = async (req, res) => {
     const { subId } = req.body; // Stripe priceId
     const { name, email } = req.body.userData;
 
-    // 1. Verify user identity
+    //  Verify user identity
     if (req.user.email !== email || req.user.name !== name) {
       return res.status(403).json({ error: "User details do not match" });
     }
 
-    // 2. Validate planId & resolve plan
+    //  Validate planId & resolve plan
     const planConfig = PLAN_ID_MAP[subId];
+    // console.log(planConfig);
     if (!planConfig) {
       return res.status(400).json({ error: "Invalid planId" });
     }
 
-    // 3. Create Stripe checkout
+    // return
+
+    //  Create Stripe checkout
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       success_url: "http://localhost:5173/success",
@@ -62,12 +65,12 @@ export const updateSubscription = async (req, res) => {
     });
 
     // console.log(session);
-    // 4. Mark subscription as pending + UPDATE Plan
+    //  Mark subscription as pending + UPDATE Plan
     await User.updateOne(
       { _id: req.user._id },
       {
         $set: {
-          Plan: planConfig.plan, // ✅ "Basic"
+          subscriptionPlan: planConfig.plan,
           subscriptionStatus: "pending",
         },
       },
@@ -85,7 +88,7 @@ const endpointSecret = "whsec_a2kUfq30BqluPlHIHjCHZLuT87wdm1wH";
 export const stripeWebhook = async (req, res) => {
   const sig = req.headers["stripe-signature"];
 
-  console.log(req.headers);
+  // console.log(req.headers);
 
   let event;
   try {
@@ -95,24 +98,19 @@ export const stripeWebhook = async (req, res) => {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 
-  console.log(event);
+  // console.log({ event });
 
   try {
     switch (event.type) {
-
       // =========================   CHECKOUT COMPLETED =========================
 
       case "checkout.session.completed": {
         const session = event.data.object;
 
-        // Safety checks
         if (session.mode !== "subscription") break;
         if (session.payment_status !== "paid") break;
 
-        const planId = session.metadata.planId;
-        const userId = session.metadata.userId;
-        
-
+        const { planId, userId } = session.metadata || {};
         if (!planId || !userId) break;
 
         const planConfig = PLAN_ID_MAP[planId];
@@ -122,14 +120,17 @@ export const stripeWebhook = async (req, res) => {
           { _id: userId },
           {
             $set: {
-              Plan: planConfig.plan,
-              subscriptionStatus: "active",
+              stripeCustomerId: session.customer,
+              stripeSubscriptionId: session.subscription,
+              subscriptionPlan: planConfig.plan,
+              subscriptionStatus: "pending",
             },
             $inc: {
               maxStorageInBytes: planConfig.addStorageBytes,
             },
           },
         );
+
         break;
       }
 
@@ -196,14 +197,23 @@ export const stripeWebhook = async (req, res) => {
       case "invoice.payment_succeeded": {
         const invoice = event.data.object;
 
+        const line = invoice.lines?.data?.[0];
+        if (!line?.period) break;
+
+        const startedAt = new Date(line.period.start * 1000);
+        const expiresAt = new Date(line.period.end * 1000);
+
         await User.updateOne(
           { stripeCustomerId: invoice.customer },
           {
             $set: {
               subscriptionStatus: "active",
+              subscriptionStartedAt: startedAt,
+              subscriptionExpiresAt: expiresAt,
             },
           },
         );
+
         break;
       }
 

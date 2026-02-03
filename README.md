@@ -1,12 +1,10 @@
 # StuffVault
 
-A full-stack **cloud storage application** that allows users to upload, manage, and share their files securely.  
+A full-stack **cloud storage application** that allows users to upload, manage, and share their files securely.
 
-
-The **client** is built with **React**, **Vite**, and **TailwindCSS**, while the **server** uses **Node.js**, **Express**, **MongoDB**, and **Redis**. 
+The **client** is built with **React**, **Vite**, and **TailwindCSS**, while the **server** uses **Node.js**, **Express**, **MongoDB**, and **Redis**.
 
 The application stores files using **AWS S3** for seamless file transfers.
-
 
 ---
 
@@ -30,15 +28,7 @@ The application stores files using **AWS S3** for seamless file transfers.
 
 - [Tech Stack](#tech-stack)
 
-- [Getting Started](#getting-started)
 
-  - [Clone Repository](#clone-repository)
-
-- [Environment Setup](#environment-setup)
-  - [Client `.env`](#client-env)
-  - [Server `.env`](#server-env)
-- [Client Setup](#client-setup)
-- [Server Setup](#server-setup)
 
 ---
 
@@ -60,13 +50,12 @@ The application stores files using **AWS S3** for seamless file transfers.
 - **Cloud storage with AWS S3** for scalable and reliable file storage.
 - Supports **Grid and List views** for file navigation.
 - View file details (size, type, created date, modified date).
-- Rename, delete  and recover files.
+- Rename, delete and recover files.
 
 ### Cloud Storage and Import
 
 - **AWS S3 Integration** for secure cloud file storage.
 - **CloudFront CDN** for fast file delivery and optimized performance.
-
 
 ### Settings and Customization
 
@@ -74,7 +63,6 @@ The application stores files using **AWS S3** for seamless file transfers.
 - Statistic of used/available Storage.
 - Change password.
 - Manage connected devices/sessions.
-
 
 ### Admin Dashboard
 
@@ -85,10 +73,10 @@ The application stores files using **AWS S3** for seamless file transfers.
 - File Management - Access directories/files with navigation.
 - Real-Time Tracking - Monitor online users and refresh instantly.
 
-
 ## Project Structure
 
 ### Client (Frontend - React + Vite + Tailwind)
+
 ```bash
 Client/
 ├── node_modules/
@@ -96,45 +84,65 @@ Client/
 │   └── vite.svg
 ├── src/
 │   ├── apis/
-│   │   ├── authApis.js
+│   │   ├── authApi.js
 │   │   ├── axiosInstances.js
-│   │   ├── directoryApis.js
+│   │   ├── directoryApi.js
 │   │   ├── fileApi.js
 │   │   ├── loginWithGithub.js
 │   │   ├── loginWithGoogle.js
-│   │   └── userApis.js
+│   │   └── userApi.js
 │   ├── assets/
-│   │   └── react.svg
+│   │   ├── react.svg
+│   │   └── ui.png
 │   ├── Component/
 │   │   ├── Views/
-│   │   │   ├── ContextMenu.jsx
-│   │   │   ├── DetailsPopup.jsx
-│   │   │   ├── DirectoryItem copy.jsx
-│   │   │   ├── DirectoryItem.jsx
-│   │   │   ├── DirectoryList.jsx
-│   │   │   ├── Header.jsx
-│   │   │   ├── MainView.jsx   #main page after app.jsx
-│   │   │   ├── Settings.jsx
-│   │   │   ├── Sidebar.jsx
-│   │   │   └── UploadToast.jsx
-│   │   ├── UsersPage.jsx
-│   │   ├── context/
-│   │   │   └── DirectoryContext.js
-│   │   ├── Forms/
-│   │   │   ├── Login.jsx
-│   │   │   ├── Register.jsx
-│   │   │   └── VerifyOtp.jsx
-│   │   ├── Models/
-│   │   │   ├── ConfirmActionModal.jsx
-│   │   │   ├── DeleteModel.jsx
-│   │   │   ├── DirectoryModel.jsx
-│   │   │   └── RenameModal.jsx
-│   │   └── Subscription/
-│   │       ├── SubscriptionCards.jsx
-│   │       └── SubscriptionPlans.jsx
-│   ├── App.jsx                 # Root component
-│   ├── index.css               # Global styles
-│   └── main.jsx                # Application entry point
+│   │   │   ├── GridView.jsx
+│   │   │   └── ListView.jsx
+│   │   ├── ActionBar.jsx
+│   │   ├── ContextMenu.jsx
+│   │   ├── DirectoryItem.jsx
+│   │   ├── DirectoryList.jsx
+│   │   ├── Header.jsx
+│   │   ├── InvalidRoute.jsx
+│   │   ├── LandingPage.jsx
+│   │   ├── MainView.jsx        # main page after App.jsx
+│   │   ├── Settings.jsx
+│   │   ├── Sidebar.jsx
+│   │   ├── UploadToast.jsx
+│   │   └── UsersPage.jsx
+│   ├── context/
+│   │   └── DirectoryContext.js
+│   ├── Forms/
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+│   │   └── VerifyOtp.jsx
+│   ├── LandingPages/
+│   │   ├── Footer.jsx
+│   │   ├── HowItWorks.jsx
+│   │   ├── LandingSectionCTA.jsx
+│   │   ├── LandingSectionOne.jsx
+│   │   └── LandingSectionTwo.jsx
+│   ├── LegalPages/
+│   │   ├── Privacy.jsx
+│   │   └── Terms.jsx
+│   ├── Models/
+│   │   ├── ConfirmActionModal.jsx
+│   │   ├── DeleteModel.jsx
+│   │   ├── DetailsPopupModel.jsx
+│   │   ├── DirectoryModel.jsx
+│   │   └── RenameModal.jsx
+│   ├── Routes/
+│   │   ├── ProtectedRoute.jsx
+│   │   ├── PublicRoute.jsx
+│   │   └── RoleRoute.jsx
+│   ├── Subscription/
+│   │   ├── SubscriptionCards.jsx
+│   │   ├── SubscriptionPlans.jsx
+│   │   └── success.jsx
+│   ├── App.jsx
+│   ├── AppRoutes.jsx
+│   ├── index.css
+│   └── main.jsx
 ├── .env
 ├── .gitignore
 ├── eslint.config.js
@@ -194,15 +202,14 @@ server/
 
 ```
 
-
 ## Screenshot Overview
 
 ### Login and Register
 
 <p align="center">
-  <img src="docs/ScreenShots/Login & Register/Login.png" alt="Login" width="45%" />
-  <img src="docs/ScreenShots/Login & Register/Register.png" alt="Register" width="45%" />
-  <img src="docs/ScreenShots/Login & Register/opt.png" alt="OTP" width="45%" />
+  <img src="assests/login.png" alt="Login" width="45%" />
+  <img src="assests/register.png" alt="Register" width="45%" />
+  <img src="assests/verify.png" alt="OTP" width="45%" />
 </p>
 
 ---
@@ -210,11 +217,11 @@ server/
 ### HomePage
 
 <p align="center">
-  <img src="docs/ScreenShots/HomePage/HomePage.png" alt="Homepage" width="45%" />
-  <img src="docs/ScreenShots/HomePage/UploadProgress.png" alt="Upload Progress" width="45%" />
-  <img src="docs/ScreenShots/HomePage/GridView.png" alt="Grid View" width="45%" />
-  <img src="docs/ScreenShots/HomePage/Details Modal.png" alt="Detail Modal" width="45%" />
-  <img src="docs/ScreenShots/HomePage/Dropdowm.png" alt="Dropdown" width="45%" />
+  <img src="assests/home.png" alt="List View" width="45%" />
+  <img src="assests/home1.png" alt="Grid View" width="45%" />
+  <img src="assests/logouts.png" alt="Logout  Buttons" width="45%" />
+  <img src="assests/Details.png" alt="Detail Modal" width="45%" />
+  <img src="assests/newDir.png" alt="New Directory" width="45%" />
 </p>
 
 ---
@@ -222,26 +229,22 @@ server/
 ### Settings
 
 <p align="center">
-  <img src="docs/ScreenShots/Settings/Settings-1.png" alt="Settings 1" width="45%" />
-  <img src="docs/ScreenShots/Settings/Settings-2.png" alt="Settings 2" width="45%" />
+  <img src="assests/setting.png" alt="Settings 1" width="45%" />
+  <!-- <img src="docs/ScreenShots/Settings/Settings-2.png" alt="Settings 2" width="45%" />
   <img src="docs/ScreenShots/Settings/Settings-3.png" alt="Settings 3" width="45%" />
-  <img src="docs/ScreenShots/Settings/Settings-4.png" alt="Settings 4" width="45%" />
+  <img src="docs/ScreenShots/Settings/Settings-4.png" alt="Settings 4" width="45%" /> -->
 </p>
 
 ---
 
-
-
 ### Admin Dashboard
 
 <p align="center">
-  <img src="docs/ScreenShots/Admin/Dashboard.png" alt="Dashboard" width="45%" />
-  <img src="docs/ScreenShots/Admin/Online-User.png" alt="Online Users" width="45%" />
-  <img src="docs/ScreenShots/Admin/Hard-Soft Delete.png" alt="Hard-soft-delete" width="45%" />
-  <img src="docs/ScreenShots/Admin/Single User view.png" alt="View Directory" width="45%" />
+  <img src="assests/dashboard.png" alt="Dashboard" width="45%" />
+  <!-- <img src="docs/ScreenShots/Admin/Online-User.png" alt="Online Users" width="45%" />
+  <img src="docs/ScreenShots/Admin/Hard-Soft Delete.png" alt="Hard-soft-delete" width="45%" /> -->
+  <!-- <img src="docs/ScreenShots/Admin/Single User view.png" alt="View Directory" width="45%" /> -->
 </p>
-
-
 
 ---
 
@@ -251,129 +254,9 @@ server/
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB, Redis
 - **Cloud Storage**: AWS S3, CloudFront CDN
-- **External APIs**:  Google OAuth2
+- **External APIs**: Google OAuth2
 - **Authentication**: Bcrypt + OTP + OAuth (Google/GitHub)
 
 ---
 
-## Getting Started
-
-### Clone Repository
-
-```bash
-git clone https://github.com/saurabkunwar32/Stuffvault.git
-cd Storage-App
-```
-
-## Environment Setup
-
-### Client `.env`
-
-```bash
-VITE_GOOGLE_CLIENT_ID=
-VITE_GOOGLE_API_KEY=
-VITE_GOOGLE_APP_ID=
-VITE_BACKEND_URL=
-```
-
-### Server `.env`
-
-```bash
-PORT=4000
-CLIENT_URLS="http://localhost:5173,https://www.storemystuff.cloud,https://storemystuff.cloud,https://app.storemystuff.cloud"
-DEFAULT_CLIENT_URL="http://localhost:5173"
-NODE_ENV="development"
-BASE_URL="http://localhost:4000"
-
-# Database
-MONGODB_URL=""
-REDIS_URI=""
-
-# OAuth Credentials
-GOOGLE_CLIENT_ID=""
-GOOGLE_CLIENT_SECRET=""
-GITHUB_CLIENT_ID=""
-GITHUB_CLIENT_SECRET=""
-
-# Signed Secret
-COOKIE_SECRET=""
-
-# Resend API Key
-RESEND_KEY=""
-
-# AWS Configuration
-AWS_ACCESS_KEY=""
-AWS_SECRET_ACCESS_KEY=""
-AWS_BUCKET=""
-AWS_REGION="ap-south-1"
-
-# CloudFront Configuration
-CLOUDFRONT_URL=""
-CLOUDFRONT_PROFILE_URL=""
-
-# Key Pair ID
-KEY_PAIR_ID=""
-
-# Private Key
-CLOUDFRONT_PRIVATE_KEY=""
-
-```
-
-## Client Setup
-
-1. Navigate to the **Client** folder:
-
-   ```bash
-   cd Client
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Add your environment variables in `.env`.
-
-4. Run the development server:
-
-   ```bash
-   npm run dev
-   ```
-
-## Server Setup
-
-1. Navigate to the **Server** folder:
-
-   ```bash
-   cd Server
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   npm install
-   ```
-
-3. Add your environment variables in `.env`.
-
-4. **AWS Setup**: Configure your AWS credentials and ensure your S3 bucket and CloudFront distribution are properly set up.
-
-5. **Google Drive API Setup**: Enable Google Drive API in Google Cloud Console and configure OAuth consent screen.
-
-6. Run setup script (for database and required folders):
-
-   ```bash
-   npm run setup
-   ```
-
-7. Ensure Redis is running (via WSL or local setup).
-
-8. Run the development server:
-
-   ```bash
-   npm run dev
-   ```
-
----
 

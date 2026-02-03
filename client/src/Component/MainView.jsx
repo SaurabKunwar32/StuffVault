@@ -192,6 +192,7 @@ export default function MainView({ userData, loading, setUserData }) {
       if (err.status === 507 || 413) {
         setErrorMessage(err.response.data.error);
       }
+      // console.log(err);
       setTimeout(() => setErrorMessage(""), 2000);
       // console.log(err);
     }
@@ -433,33 +434,31 @@ export default function MainView({ userData, loading, setUserData }) {
   return (
     <>
       {errorMessage &&
-        errorMessage !==
-          "Directory not found or you do not have access to it!" && (
-          <div className="fixed top-6 right-6 z-50 animate-slide-in">
-            <div className="flex items-center gap-3 px-5 py-4 bg-red-50 border-l-4 border-red-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
-              {/* Error Icon */}
-              <AlertTriangle className="w-6 h-6 text-red-600" />
+  errorMessage !==
+    "Directory not found or you do not have access to it!" && (
+    <div className="fixed top-20 right-6 z-[9999] animate-slide-in pointer-events-auto">
+      <div className="flex items-center gap-3 px-5 py-4 bg-red-50 border-l-4 border-red-600 rounded-lg shadow-lg min-w-[280px] max-w-sm">
+        <AlertTriangle className="w-6 h-6 text-red-600" />
 
-              {/* Message */}
-              <div className="flex-1">
-                <p>
-                  {typeof errorMessage === "string"
-                    ? errorMessage
-                    : errorMessage?.message || "Something went wrong"}
-                </p>
-              </div>
+        <div className="flex-1">
+          <p className="text-sm text-red-800">
+            {typeof errorMessage === "string"
+              ? errorMessage
+              : errorMessage?.message || "Something went wrong"}
+          </p>
+        </div>
 
-              {/* Close Button (Centered) */}
-              <button
-                onClick={() => setErrorMessage("")}
-                className="text-red-500 hover:text-red-700 transition ml-2"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
+        <button
+          onClick={() => setErrorMessage("")}
+          className="text-red-500 hover:text-red-700 transition"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+)}
+
 
       <div className="h-screen flex flex-col max-w-[1540px] mx-auto">
 
