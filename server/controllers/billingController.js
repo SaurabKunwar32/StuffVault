@@ -82,7 +82,7 @@ export const updateSubscription = async (req, res) => {
     }
 
     // return
-    console.log(req.headers.origin);
+    // console.log(req.headers.origin);
 
     //  Create Stripe checkout
     const session = await stripe.checkout.sessions.create({

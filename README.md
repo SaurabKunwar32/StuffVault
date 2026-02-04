@@ -256,7 +256,7 @@ server/
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB, Redis
 - **Cloud Storage**: AWS S3, CloudFront CDN
-- **External APIs**: Google OAuth2
+- **External APIs**: Google OAuth2 , Stripe 
 - **Authentication**: Bcrypt + OTP + OAuth (Google/GitHub)
 
 ---
