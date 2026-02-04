@@ -13,7 +13,7 @@ The application stores files using **AWS S3** for seamless file transfers.
 - [Features](#features)
   - [Authentication and Security](#authentication-and-security)
   - [File Management](#file-management)
-  - [Cloud Storage and Import](#cloud-storage)
+  - [Cloud Storage ](#cloud-storage)
   - [Settings and Customization](#settings-and-customization)
   - [Admin Dashboard](#admin-dashboard)
 
