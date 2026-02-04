@@ -13,7 +13,7 @@ The application stores files using **AWS S3** for seamless file transfers.
 - [Features](#features)
   - [Authentication and Security](#authentication-and-security)
   - [File Management](#file-management)
-  - [Cloud Storage and Import](#cloud-storage-and-import)
+  - [Cloud Storage and Import](#cloud-storage)
   - [Settings and Customization](#settings-and-customization)
   - [Admin Dashboard](#admin-dashboard)
 
@@ -50,7 +50,7 @@ The application stores files using **AWS S3** for seamless file transfers.
 - View file details (size, type, created date, modified date).
 - Rename and delete files.
 
-### Cloud Storage and Import
+### Cloud Storage
 
 - **AWS S3 Integration** for secure cloud file storage.
 - **CloudFront CDN** for fast file delivery and optimized performance.
