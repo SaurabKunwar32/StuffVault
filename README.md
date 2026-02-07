@@ -13,7 +13,7 @@ The application stores files using **AWS S3** for seamless file transfers.
 - [Features](#features)
   - [Authentication and Security](#authentication-and-security)
   - [File Management](#file-management)
-  - [Cloud Storage ](#cloud-storage)
+  - [Cloud Storage and Payments ](#cloud-storage-and-payments)
   - [Settings and Customization](#settings-and-customization)
   - [Admin Dashboard](#admin-dashboard)
 
@@ -54,6 +54,7 @@ The application stores files using **AWS S3** for seamless file transfers.
 
 - **AWS S3 Integration** for secure cloud file storage.
 - **CloudFront CDN** for fast file delivery and optimized performance.
+- Integrated **Stripe** to enable secure payments for purchasing additional storage.
 
 ### Settings and Customization
 
